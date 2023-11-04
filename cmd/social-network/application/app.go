@@ -9,7 +9,7 @@ import (
 type App struct {
 	Config *configuration.Config
 	Logger *zap.Logger
-	Closer *closer.Closer // TODO
+	Closer *closer.Closer // TODO -fix
 }
 
 func New(cfg *configuration.Config, logger *zap.Logger) *App {
