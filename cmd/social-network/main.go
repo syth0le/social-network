@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"social-network/cmd/social-network/application"
 	"social-network/cmd/social-network/configuration"
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/spf13/pflag"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -22,8 +24,28 @@ func main() {
 		log.Fatalf("config validation failed: %v", err)
 	}
 
-	// TODO: closures
+	logger, err := constructLogger()
+	if err != nil {
+		log.Fatalf("failed to create logger: %v", err)
+	}
 
+	app := application.New(cfg, logger) // TODO: closures
+	if err = app.Run(); err != nil {
+		logger.Sugar().Fatalf("application stopped with error: %v", err)
+	} else {
+		logger.Info("application stopped")
+	}
+
+}
+
+func constructLogger() (*zap.Logger, error) {
+	logger, err := zap.NewProduction() // TODO
+	if err != nil {
+		return nil, err
+	}
+
+	defer logger.Sync()
+	return logger, nil
 }
 
 func loadConfig(ctx context.Context) (*configuration.Config, error) {
