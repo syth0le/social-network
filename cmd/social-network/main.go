@@ -53,7 +53,7 @@ func loadConfig(ctx context.Context) (*configuration.Config, error) {
 
 	configPath := pflag.StringP("config", "c", "", "config path")
 
-	if err := cleanenv.ReadConfig(configPath, cfg); err != nil {
+	if err := cleanenv.ReadConfig(*configPath, cfg); err != nil {
 		return nil, fmt.Errorf("cannot load config: %w", err)
 	}
 	return cfg, nil
