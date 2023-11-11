@@ -14,7 +14,7 @@ func (s *Storage) LoginUser(ctx context.Context, userLogin *model.UserLogin) (*m
 	return nil, nil
 }
 
-func (s *Storage) RegisterUser(ctx context.Context, params *model.UserRegister) (*model.User, error) {
+func (s *Storage) CreateUser(ctx context.Context, params *model.UserRegister) (*model.User, error) {
 	err := params.Validate()
 	if err != nil {
 		return nil, fmt.Errorf("params validate: %w", err)

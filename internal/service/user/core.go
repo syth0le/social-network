@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"social-network/internal/model"
 	"social-network/internal/storage"
@@ -32,7 +33,7 @@ func (s *ServiceImpl) Login(ctx context.Context, params *LoginParams) (*model.To
 		return nil, fmt.Errorf("hash password: %w", err)
 	}
 
-	token, err := s.Storage.User().LoginUser(ctx, model.UserLogin{
+	token, err := s.Storage.User().LoginUser(ctx, &model.UserLogin{
 		Username:       params.Username,
 		HashedPassword: hashedPassword,
 	})
@@ -50,7 +51,7 @@ type RegisterParams struct {
 	SecondName string
 	Age        int
 	Sex        string
-	Birthdate  string
+	Birthdate  time.Time
 	Biography  string
 	City       string
 }
@@ -61,19 +62,19 @@ func (s *ServiceImpl) Register(ctx context.Context, params *RegisterParams) (*mo
 		return nil, fmt.Errorf("hash password: %w", err)
 	}
 
-	user, err := s.Storage.User().RegisterUser(ctx, model.UserRegister{
+	user, err := s.Storage.User().CreateUser(ctx, &model.UserRegister{
+		ID:             utils.GenerateUUID(),
 		Username:       params.Username,
 		HashedPassword: hashedPassword,
 		FirstName:      params.FirstName,
 		SecondName:     params.SecondName,
-		Age:            params.Age,
 		Sex:            params.Sex,
 		Birthdate:      params.Birthdate,
 		Biography:      params.Biography,
 		City:           params.City,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("register user: %w", err)
+		return nil, fmt.Errorf("create user: %w", err)
 	}
 
 	generatedToken, err := s.TokenGenerator.GenerateToken(user)
@@ -81,7 +82,7 @@ func (s *ServiceImpl) Register(ctx context.Context, params *RegisterParams) (*mo
 		return nil, fmt.Errorf("generate token: %w", err)
 	}
 
-	token, err := s.Storage.Token().CreateToken(ctx, model.Token{
+	token, err := s.Storage.Token().CreateToken(ctx, &model.Token{
 		UserID: user.UserID,
 		Token:  generatedToken,
 	})

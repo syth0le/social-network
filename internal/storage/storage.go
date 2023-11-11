@@ -12,7 +12,7 @@ type Storage interface {
 
 type UserRepository interface {
 	LoginUser(ctx context.Context, userLogin *model.UserLogin) (*model.User, error)
-	RegisterUser(ctx context.Context, user *model.UserRegister) (*model.User, error)
+	CreateUser(ctx context.Context, user *model.UserRegister) (*model.User, error)
 	GetUserByID(ctx context.Context, id model.UserID) (*model.User, error)
 }
 
