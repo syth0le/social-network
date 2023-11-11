@@ -10,8 +10,26 @@ import (
 )
 
 func (s *Storage) LoginUser(ctx context.Context, userLogin *model.UserLogin) (*model.User, error) {
+	sql, args, err := sq.Select(userFields...).
+		From(UserTable).
+		Where(sq.Eq{
+			fieldUsername:       userLogin.Username,
+			fieldHashedPassword: userLogin.HashedPassword,
+			fieldDeletedAt:      nil,
+		}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("incorrect sql") // todo internal error
+	}
 
-	return nil, nil
+	var entity userEntity
+	err = sqlx.GetContext(ctx, nil, &entity, sql, args...)
+	if err != nil {
+		return nil, fmt.Errorf("internal error")
+	}
+
+	return userEntityToModel(entity), nil
 }
 
 func (s *Storage) CreateUser(ctx context.Context, params *model.UserRegister) (*model.User, error) {
@@ -41,19 +59,36 @@ func (s *Storage) CreateUser(ctx context.Context, params *model.UserRegister) (*
 }
 
 func (s *Storage) GetUserByID(ctx context.Context, id model.UserID) (*model.User, error) {
-	return nil, nil
+	sql, args, err := sq.Select(userFields...).
+		From(UserTable).
+		Where(sq.Eq{
+			fieldID:        id.String(),
+			fieldDeletedAt: nil,
+		}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("incorrect sql") // todo internal error
+	}
+
+	var entity userEntity
+	err = sqlx.GetContext(ctx, nil, &entity, sql, args...)
+	if err != nil {
+		return nil, fmt.Errorf("internal error") // TODO: error wrapper SWITCH-CASE internal/not found
+	}
+
+	return userEntityToModel(entity), nil
 }
 
 type userEntity struct {
 	ID         string    `db:"id"`
-	Username   string    `db:"id"`
-	FirstName  string    `db:"id"`
-	SecondName string    `db:"id"`
-	Age        int       `db:"id"`
-	Sex        string    `db:"id"`
-	Birthdate  time.Time `db:"id"`
-	Biography  string    `db:"id"`
-	City       string    `db:"id"`
+	Username   string    `db:"username"`
+	FirstName  string    `db:"first_name"`
+	SecondName string    `db:"second_name"`
+	Sex        string    `db:"sex"`
+	Birthdate  time.Time `db:"birthdate"`
+	Biography  string    `db:"biography"`
+	City       string    `db:"city"`
 }
 
 func userEntityToModel(entity userEntity) *model.User {
@@ -62,7 +97,6 @@ func userEntityToModel(entity userEntity) *model.User {
 		Username:   entity.Username,
 		FirstName:  entity.FirstName,
 		SecondName: entity.SecondName,
-		Age:        entity.Age,
 		Sex:        entity.Sex,
 		Birthdate:  entity.Birthdate,
 		Biography:  entity.Biography,

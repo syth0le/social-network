@@ -33,12 +33,26 @@ func (s *ServiceImpl) Login(ctx context.Context, params *LoginParams) (*model.To
 		return nil, fmt.Errorf("hash password: %w", err)
 	}
 
-	token, err := s.Storage.User().LoginUser(ctx, &model.UserLogin{
+	user, err := s.Storage.User().LoginUser(ctx, &model.UserLogin{
 		Username:       params.Username,
 		HashedPassword: hashedPassword,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("login user: %w", err)
+	}
+
+	generatedToken, err := s.TokenGenerator.GenerateToken(user)
+	if err != nil {
+		return nil, fmt.Errorf("generate token: %w", err)
+	}
+
+	token, err := s.Storage.Token().CreateToken(ctx, &model.Token{
+		UserID: user.UserID,
+		Token:  generatedToken,
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("create token: %w", err)
 	}
 
 	return token, nil

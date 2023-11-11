@@ -17,7 +17,6 @@ type User struct {
 	Username   string
 	FirstName  string
 	SecondName string
-	Age        int
 	Sex        string
 	Birthdate  time.Time
 	Biography  string

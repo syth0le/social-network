@@ -15,11 +15,12 @@ services:
       - PORT=8000
       - JWT_TOKEN_SALT=${JWT_TOKEN_SALT}
     depends_on:
-      - db
+      - master
+      - slave
     volumes:
       - .:/app
-  db:
-    image: postgres:15-alpine
+  master:
+    image: postgres:latest
     container_name: "db"
     networks:
       new:
@@ -28,7 +29,7 @@ services:
     env_file:
       - .env.example
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - ./master/data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=social-network-local
       - POSTGRES_NAME=social-network-local
@@ -41,6 +42,30 @@ services:
       interval: 5s
       retries: 5
     restart: always
-
-volumes:
-  postgres_data:
+  slave:
+    image: postgres:latest
+    container_name: "db"
+    networks:
+      new:
+        aliases:
+          - database
+    env_file:
+      - .env.example
+    volumes:
+      - ./slave/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=social-network-local
+      - POSTGRES_NAME=social-network-local
+      - POSTGRES_USER=social-network-local-admin
+      - POSTGRES_MASTER_HOST=master
+      - POSTGRES_MASTER_PORT=5432
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d qtr_portal -U qtr_portal" ]
+      interval: 5s
+      retries: 5
+    depends_on:
+      - master
+    restart: always
