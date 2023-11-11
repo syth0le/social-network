@@ -13,11 +13,11 @@ func (c *Config) Validate() error {
 }
 
 type LoggerConfig struct {
-	Level      utils.Level `yaml:"level"`
-	Encoding   string      `yaml:"encoding"`
-	Path       string      `yaml:"path"`
-	App        string      `yaml:"app"`
-	Enviroment string      `yaml:"enviroment"`
+	Level       utils.Level `yaml:"level"`
+	Encoding    string      `yaml:"encoding"`
+	Path        string      `yaml:"path"`
+	App         string      `yaml:"app"`
+	Environment string      `yaml:"environment"`
 }
 
 func (c *LoggerConfig) Validate() error {
@@ -25,9 +25,10 @@ func (c *LoggerConfig) Validate() error {
 }
 
 type ServerConfig struct {
-	Enable   bool   `yaml:"enable_mock"`
-	Endpoint string `yaml:"endpoint`
-	Port     string `yaml:"port"`
+	Enable       bool   `yaml:"enable"`
+	Endpoint     string `yaml:"endpoint"`
+	Port         int    `yaml:"port" env:"PORT"`
+	JwtTokenSalt string `yaml:"jwt_token_salt" env:"JWT_TOKEN_SALT"`
 }
 
 func (c *ServerConfig) Validate() error {
@@ -36,11 +37,11 @@ func (c *ServerConfig) Validate() error {
 
 type StorageConfig struct {
 	EnableMock         bool   `yaml:"enable_mock"`
-	Host               string `yaml:"host" env:"HOST"`
-	Port               int    `yaml:"port" env:"PORT"`
-	Database           string `yaml:"database" env:"DATABASE"`
-	Username           string `yaml:"username" env:"USER"`
-	Password           string `yaml:"password" env:"PASSWORD"`
+	Host               string `yaml:"host"`
+	Port               int    `yaml:"port"`
+	Database           string `yaml:"database"`
+	Username           string `yaml:"username"`
+	Password           string `yaml:"password" env:"DB_PASSWORD"`
 	SSLMode            string `yaml:"ssl_mode"`
 	ConnectionAttempts int    `yaml:"connection_attempts"`
 }

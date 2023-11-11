@@ -1,6 +1,9 @@
 package postgres
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 const (
 	UserTable  = "user_table"
@@ -13,16 +16,17 @@ const (
 )
 
 const (
+	fieldID     = "id"
 	fieldUserID = "user_id"
 
-	fieldUsername   = "username"
-	fieldFirstName  = "first_name"
-	fieldSecondName = "second_name"
-	fieldAge        = "age"
-	fieldSex        = "sex"
-	fieldBirthdate  = "birthdate"
-	fieldBiography  = "biography"
-	fieldCity       = "city"
+	fieldUsername       = "username"
+	fieldHashedPassword = "hashed_password"
+	fieldFirstName      = "first_name"
+	fieldSecondName     = "second_name"
+	fieldSex            = "sex"
+	fieldBirthdate      = "birthdate"
+	fieldBiography      = "biography"
+	fieldCity           = "city"
 
 	fieldCreatedAt = "created_at"
 	fieldDeletedAt = "deleted_at"
@@ -33,11 +37,12 @@ const (
 
 var (
 	userFields = []string{
-		fieldUserID, fieldUsername, fieldFirstName, fieldSecondName,
-		fieldAge, fieldSex, fieldBirthdate, fieldBiography, fieldCity,
-		fieldCreatedAt, fieldDeletedAt,
+		fieldID, fieldUsername, fieldHashedPassword, fieldFirstName, fieldSecondName,
+		fieldSex, fieldBirthdate, fieldBiography, fieldCity, fieldCreatedAt,
 	}
-	tokenFields = []string{fieldUserID, fieldToken, fieldCreatedAt, fieldDeletedAt, fieldAlivedAt}
+	tokenFields = []string{fieldID, fieldUserID, fieldToken, fieldCreatedAt, fieldAlivedAt}
+
+	returningUser = returning + strings.Join(userFields, separator)
 )
 
 func tableField(table, field string) string {
