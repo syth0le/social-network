@@ -1,18 +1,24 @@
 package postgres
 
 import (
+	"fmt"
+	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 	"social-network/cmd/social-network/configuration"
 	"social-network/internal/storage"
 )
 
 type Storage struct {
-	//storage *postgres.Storage
+	storage *PGStorage
 }
 
 func NewStorage(logger *zap.Logger, config configuration.StorageConfig) (*Storage, error) {
+	postgresStorage, err := NewPGStorage(logger, config)
+	if err != nil {
+		return nil, fmt.Errorf("new pg storage: %w", err)
+	}
 	return &Storage{
-		//storage: nil,
+		storage: postgresStorage,
 	}, nil
 }
 
@@ -22,4 +28,20 @@ func (s *Storage) User() storage.UserRepository {
 
 func (s *Storage) Token() storage.TokenRepository {
 	return s
+}
+
+func (s *Storage) Close() error {
+	return s.storage.Close()
+}
+
+func (s *Storage) Master() sqlx.ExtContext {
+	return s.storage.Master()
+}
+
+func (s *Storage) Slave() sqlx.ExtContext {
+	return s.storage.Slave()
+}
+
+func (s *Storage) now() {
+	//TODO: implement
 }

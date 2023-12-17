@@ -56,7 +56,7 @@ func (a *App) constructEnv(ctx context.Context) (*env, error) {
 	if err != nil {
 		return nil, fmt.Errorf("new storage: %w", err)
 	}
-	//a.Closer.Add(db.Close)
+	a.Closer.Add(db.Close)
 
 	tokenGenerator := token.NewGenerator(a.Config.Application)
 	userService := &user.ServiceImpl{

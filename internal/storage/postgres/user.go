@@ -24,7 +24,7 @@ func (s *Storage) LoginUser(ctx context.Context, userLogin *model.UserLogin) (*m
 	}
 
 	var entity userEntity
-	err = sqlx.GetContext(ctx, nil, &entity, sql, args...)
+	err = sqlx.GetContext(ctx, s.Master(), &entity, sql, args...)
 	if err != nil {
 		return nil, fmt.Errorf("internal error")
 	}
@@ -50,7 +50,7 @@ func (s *Storage) CreateUser(ctx context.Context, params *model.UserRegister) (*
 		return nil, fmt.Errorf("incorrect sql") // todo internal error
 	}
 	var entity userEntity
-	err = sqlx.GetContext(ctx, nil, &entity, sql, args...)
+	err = sqlx.GetContext(ctx, s.Slave(), &entity, sql, args...)
 	if err != nil {
 		return nil, fmt.Errorf("internal error")
 	}
@@ -72,7 +72,7 @@ func (s *Storage) GetUserByID(ctx context.Context, id model.UserID) (*model.User
 	}
 
 	var entity userEntity
-	err = sqlx.GetContext(ctx, nil, &entity, sql, args...)
+	err = sqlx.GetContext(ctx, s.Slave(), &entity, sql, args...)
 	if err != nil {
 		return nil, fmt.Errorf("internal error") // TODO: error wrapper SWITCH-CASE internal/not found
 	}

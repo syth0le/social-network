@@ -34,14 +34,15 @@ func NewDefaultConfig() *Config {
 			Port:     0,
 		},
 		Storage: StorageConfig{
-			EnableMock:         false,
-			Host:               "",
-			Port:               0,
-			Database:           "",
-			Username:           "",
-			Password:           "",
-			SSLMode:            "",
-			ConnectionAttempts: 0,
+			EnableMock:            false,
+			Hosts:                 []string{},
+			Port:                  0,
+			Database:              "",
+			Username:              "",
+			Password:              "",
+			SSLMode:               "",
+			ConnectionAttempts:    0,
+			InitializationTimeout: 5 * time.Second,
 		},
 	}
 }

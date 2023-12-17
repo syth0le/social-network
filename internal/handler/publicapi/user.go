@@ -145,7 +145,7 @@ func userModelToResponse(user *model.User) *userResponse {
 		FirstName:  user.FirstName,
 		SecondName: user.SecondName,
 		Sex:        user.Sex,
-		Birthdate:  user.Birthdate.GoString(),
+		Birthdate:  user.Birthdate.String(),
 		Biography:  user.Biography,
 		City:       user.City,
 	}
