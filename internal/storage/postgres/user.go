@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+// TODO: tests
+
 func (s *Storage) LoginUser(ctx context.Context, userLogin *model.UserLogin) (*model.User, error) {
 	sql, args, err := sq.Select(userFields...).
 		From(UserTable).
