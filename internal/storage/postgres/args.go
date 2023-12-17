@@ -42,7 +42,8 @@ var (
 	}
 	tokenFields = []string{fieldID, fieldUserID, fieldToken, fieldCreatedAt, fieldAlivedAt}
 
-	returningUser = returning + strings.Join(userFields, separator)
+	returningUser  = returning + strings.Join(userFields, separator)
+	returningToken = returning + strings.Join(tokenFields, separator)
 )
 
 func tableField(table, field string) string {

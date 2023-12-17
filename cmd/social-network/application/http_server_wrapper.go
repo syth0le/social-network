@@ -1,41 +1,49 @@
 package application
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"social-network/cmd/social-network/configuration"
+	"social-network/internal/utils"
 
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )
 
+type ServerOption struct {
+	Port int
+	Mux  *chi.Mux
+}
+
 type httpServerOption struct {
-	adminServerOption   *struct{}
-	publicServersOption []*struct{}
+	adminServerOption   *ServerOption
+	publicServersOption []*ServerOption
 }
 
 type HTTPServerOption func(*httpServerOption)
 
-func WithAdminServer(cfg struct{}) HTTPServerOption {
+func WithAdminServer(cfg configuration.ServerConfig) HTTPServerOption {
 	return func(opts *httpServerOption) {
-		opts.adminServerOption = &struct{}{}
+		opts.adminServerOption = &ServerOption{Port: cfg.Port}
 	}
 }
 
-func WithPublicServer(cfg struct{}, mux *chi.Mux) HTTPServerOption {
-	// TODO: use mux
+func WithPublicServer(cfg configuration.ServerConfig, mux *chi.Mux) HTTPServerOption {
 	return func(opts *httpServerOption) {
-		opts.publicServersOption = append(opts.publicServersOption, &struct{}{})
+		opts.publicServersOption = append(opts.publicServersOption, &ServerOption{Port: cfg.Port, Mux: mux})
 	}
 }
 
 type HTTPServerWrapper struct {
-	logger  zap.Logger
+	logger  *zap.Logger
 	servers []*http.Server
 }
 
-func NewHTTPServerWrapper(logger zap.Logger, opts ...HTTPServerOption) *HTTPServerWrapper {
+func NewHTTPServerWrapper(logger *zap.Logger, opts ...HTTPServerOption) *HTTPServerWrapper {
 	options := &httpServerOption{
 		adminServerOption:   nil,
 		publicServersOption: nil,
@@ -45,15 +53,15 @@ func NewHTTPServerWrapper(logger zap.Logger, opts ...HTTPServerOption) *HTTPServ
 		o(options)
 	}
 
-	servers := []*http.Server{}
+	var servers []*http.Server
 
 	if options.adminServerOption != nil {
 		// todo make admin server
-		// servers = append(servers, nil)
+		servers = append(servers, newNetHTTPServer(logger, options.adminServerOption.Port))
 	}
 
 	for _, option := range options.publicServersOption {
-		servers = append(servers, newNetHTTPServer(logger, option.port))
+		servers = append(servers, newNetHTTPServer(logger, option.Port))
 	}
 
 	return &HTTPServerWrapper{
@@ -62,19 +70,49 @@ func NewHTTPServerWrapper(logger zap.Logger, opts ...HTTPServerOption) *HTTPServ
 	}
 }
 
-func (h *HTTPServerWrapper) Run() error {
-	for _, server := range h.servers {
+func (h *HTTPServerWrapper) Run() []func() error {
+	runFunc := func(server *http.Server) error {
+		h.logger.Sugar().Infof("run http server on addr: %s", server.Addr)
 		err := server.ListenAndServe()
-		if err != nil {
-			return fmt.Errorf("stop http server, addr: %s", server.Addr, err)
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			return fmt.Errorf("server listen and serve: %w", err)
 		}
+		return nil
 	}
-	return nil
+
+	response := make([]func() error, 0, len(h.servers))
+	for _, server := range h.servers {
+		server := server
+		response = append(response, func() error {
+			return runFunc(server)
+		})
+	}
+	return response
 }
 
-func newNetHTTPServer(logger zap.Logger, port int) *http.Server {
+func (h *HTTPServerWrapper) GracefulStop() []func() error {
+	gracefulFunc := func(server *http.Server) error {
+		err := server.Shutdown(context.Background())
+		if err != nil {
+			return fmt.Errorf("server shutdown: %w", err)
+		}
+		return nil
+	}
+
+	response := make([]func() error, 0, len(h.servers))
+	for _, server := range h.servers {
+		server := server
+		response = append(response, func() error {
+			return gracefulFunc(server)
+		})
+	}
+	return response
+}
+
+func newNetHTTPServer(logger *zap.Logger, port int) *http.Server {
 	// TODO: admin server wrapper
 	mux := chi.NewMux()
+	mux.Use(utils.LoggerMiddleware(logger))
 	mux.Get("/ping", pingHandler())
 
 	return &http.Server{

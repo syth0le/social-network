@@ -18,7 +18,7 @@ type UserRepository interface {
 
 type TokenRepository interface {
 	GetCurrentUserToken(ctx context.Context, id model.UserID) (*model.Token, error)
-	CreateToken(ctx context.Context, token *model.Token) (*model.Token, error)
-	RevokeToken(ctx context.Context, token *model.Token) (*model.Token, error)
-	RefreshToken(ctx context.Context, token *model.Token) (*model.Token, error)
+	CreateToken(ctx context.Context, token *model.TokenWithMetadata) (*model.Token, error)
+	RevokeToken(ctx context.Context, token *model.Token) error
+	RefreshToken(ctx context.Context, token *model.TokenWithMetadata) (*model.Token, error)
 }

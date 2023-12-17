@@ -9,7 +9,8 @@ import (
 func (a *App) newHTTPServer(env *env) *HTTPServerWrapper {
 	return NewHTTPServerWrapper(
 		a.Logger,
-		WithPublicServer(struct{}{}, a.publicMux(env)),
+		WithAdminServer(a.Config.AdminServer),
+		WithPublicServer(a.Config.PublicServer, a.publicMux(env)),
 	)
 }
 

@@ -1,27 +1,39 @@
 package configuration
 
-import "social-network/internal/utils"
+import (
+	"social-network/internal/utils"
+	"time"
+)
 
 const (
-	defaultAppName     = "social-network"
-	defaultEnvironment = "dev"
+	defaultAppName   = "social-network"
+	defaultSaltValue = "saltValue"
 )
 
 func NewDefaultConfig() *Config {
 	return &Config{
-		Logger: &LoggerConfig{
+		Logger: LoggerConfig{
 			Level:       utils.InfoLevel,
 			Encoding:    "console",
 			Path:        "stdout",
-			App:         defaultAppName,
-			Environment: defaultEnvironment,
+			Environment: utils.Development,
 		},
-		Server: &ServerConfig{
+		Application: ApplicationConfig{
+			GracefulShutdownTimeout: 15 * time.Second,
+			App:                     defaultAppName,
+			SaltValue:               defaultSaltValue,
+		},
+		PublicServer: ServerConfig{
 			Enable:   false,
 			Endpoint: "",
 			Port:     0,
 		},
-		Storage: &StorageConfig{
+		AdminServer: ServerConfig{
+			Enable:   false,
+			Endpoint: "",
+			Port:     0,
+		},
+		Storage: StorageConfig{
 			EnableMock:         false,
 			Host:               "",
 			Port:               0,

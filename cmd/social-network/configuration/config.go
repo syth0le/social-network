@@ -1,11 +1,16 @@
 package configuration
 
-import "social-network/internal/utils"
+import (
+	"social-network/internal/utils"
+	"time"
+)
 
 type Config struct {
-	Logger  *LoggerConfig  `yaml:"logger"`
-	Server  *ServerConfig  `yaml:"server"`
-	Storage *StorageConfig `yaml:"storage"`
+	Logger       LoggerConfig      `yaml:"logger"`
+	Application  ApplicationConfig `yaml:"application"`
+	PublicServer ServerConfig      `yaml:"public_server"`
+	AdminServer  ServerConfig      `yaml:"admin_server"`
+	Storage      StorageConfig     `yaml:"storage"`
 }
 
 func (c *Config) Validate() error {
@@ -13,14 +18,23 @@ func (c *Config) Validate() error {
 }
 
 type LoggerConfig struct {
-	Level       utils.Level `yaml:"level"`
-	Encoding    string      `yaml:"encoding"`
-	Path        string      `yaml:"path"`
-	App         string      `yaml:"app"`
-	Environment string      `yaml:"environment"`
+	Level       utils.Level       `yaml:"level"`
+	Encoding    string            `yaml:"encoding"`
+	Path        string            `yaml:"path"`
+	Environment utils.Environment `yaml:"environment"`
 }
 
 func (c *LoggerConfig) Validate() error {
+	return nil // todo
+}
+
+type ApplicationConfig struct {
+	GracefulShutdownTimeout time.Duration `yaml:"graceful_shutdown_timeout"`
+	App                     string        `yaml:"app"`
+	SaltValue               string        `yaml:"salt_value"`
+}
+
+func (c *ApplicationConfig) Validate() error {
 	return nil // todo
 }
 

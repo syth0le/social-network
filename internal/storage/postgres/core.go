@@ -1,18 +1,18 @@
 package postgres
 
 import (
-	"log"
+	"go.uber.org/zap"
 	"social-network/cmd/social-network/configuration"
 	"social-network/internal/storage"
 )
 
 type Storage struct {
-	storage *postgres.Storage
+	//storage *postgres.Storage
 }
 
-func NewStorage(logger log.Logger, config configuration.StorageConfig) (*Storage, error) {
+func NewStorage(logger *zap.Logger, config configuration.StorageConfig) (*Storage, error) {
 	return &Storage{
-		storage: nil,
+		//storage: nil,
 	}, nil
 }
 
@@ -20,6 +20,6 @@ func (s *Storage) User() storage.UserRepository {
 	return s
 }
 
-func (s *Storage) Token() storage.UserRepository {
+func (s *Storage) Token() storage.TokenRepository {
 	return s
 }

@@ -12,6 +12,12 @@ func (id UserID) String() string {
 	return string(id)
 }
 
+type TokenID string
+
+func (id TokenID) String() string {
+	return string(id)
+}
+
 type User struct {
 	UserID     UserID
 	Username   string
@@ -24,8 +30,23 @@ type User struct {
 }
 
 type Token struct {
-	UserID UserID
-	Token  string
+	TokenID TokenID
+	UserID  UserID
+	Token   string
+}
+
+type TokenWithMetadata struct {
+	TokenID  string    `validator:"nonzero"`
+	UserID   UserID    `validator:"nonzero"`
+	Token    string    `validator:"nonzero"`
+	AlivedAt time.Time `validator:"nonzero"`
+}
+
+func (t *TokenWithMetadata) Validate() error {
+	if err := validator.Validate(t); err != nil {
+		return fmt.Errorf("validate: %w", err)
+	}
+	return nil
 }
 
 type UserLogin struct {

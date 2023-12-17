@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"social-network/internal/model"
 	"social-network/internal/service/user"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -19,7 +20,6 @@ type userResponse struct {
 	Username   string `json:"username"`
 	FirstName  string `json:"first_name"`
 	SecondName string `json:"second_name"`
-	Age        int    `json:"age"`
 	Sex        string `json:"sex"`
 	Birthdate  string `json:"birthdate"`
 	Biography  string `json:"biography"`
@@ -64,15 +64,15 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 type registerRequest struct {
-	Username   string `json:"username"`
-	Password   string `json:"password"`
-	FirstName  string `json:"first_name"`
-	SecondName string `json:"second_name"`
-	Age        int    `json:"age"`
-	Sex        string `json:"sex"`
-	Birthdate  string `json:"birthdate"`
-	Biography  string `json:"biography"`
-	City       string `json:"city"`
+	Username   string    `json:"username"`
+	Password   string    `json:"password"`
+	FirstName  string    `json:"first_name"`
+	SecondName string    `json:"second_name"`
+	Age        int       `json:"age"`
+	Sex        string    `json:"sex"`
+	Birthdate  time.Time `json:"birthdate"`
+	Biography  string    `json:"biography"`
+	City       string    `json:"city"`
 }
 
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
@@ -144,9 +144,8 @@ func userModelToResponse(user *model.User) *userResponse {
 		Username:   user.Username,
 		FirstName:  user.FirstName,
 		SecondName: user.SecondName,
-		Age:        user.Age,
 		Sex:        user.Sex,
-		Birthdate:  user.Birthdate,
+		Birthdate:  user.Birthdate.GoString(),
 		Biography:  user.Biography,
 		City:       user.City,
 	}

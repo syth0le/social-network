@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"go.uber.org/zap"
 	"io"
-	"log"
 	"net/http"
 	"social-network/internal/service/user"
 
@@ -13,12 +13,12 @@ import (
 )
 
 type Handler struct {
-	Logger      log.Logger
+	Logger      *zap.Logger
 	UserService user.Service
 }
 
 func (h *Handler) writeError(ctx context.Context, w http.ResponseWriter, err error) {
-	// TODO
+	http.Error(w, "internal error", http.StatusInternalServerError) // TODO: make error mapping
 }
 
 func writeResponse(w http.ResponseWriter, response any) {

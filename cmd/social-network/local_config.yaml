@@ -3,9 +3,15 @@ logger:
   encoding: "console"
   path: "stdout"
 
-server:
+public_server:
   enable: true
   endpoint: "localhost"
+  port: 8080
+
+admin_server:
+  enable: true
+  endpoint: "localhost"
+  port: 8081
 
 storage:
   host: "localhost"

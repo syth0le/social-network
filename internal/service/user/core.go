@@ -46,9 +46,11 @@ func (s *ServiceImpl) Login(ctx context.Context, params *LoginParams) (*model.To
 		return nil, fmt.Errorf("generate token: %w", err)
 	}
 
-	token, err := s.Storage.Token().CreateToken(ctx, &model.Token{
-		UserID: user.UserID,
-		Token:  generatedToken,
+	token, err := s.Storage.Token().CreateToken(ctx, &model.TokenWithMetadata{
+		TokenID:  utils.GenerateUUID(),
+		UserID:   user.UserID,
+		Token:    generatedToken,
+		AlivedAt: s.TokenGenerator.GetExpirationDate(),
 	})
 
 	if err != nil {
@@ -96,9 +98,11 @@ func (s *ServiceImpl) Register(ctx context.Context, params *RegisterParams) (*mo
 		return nil, fmt.Errorf("generate token: %w", err)
 	}
 
-	token, err := s.Storage.Token().CreateToken(ctx, &model.Token{
-		UserID: user.UserID,
-		Token:  generatedToken,
+	token, err := s.Storage.Token().CreateToken(ctx, &model.TokenWithMetadata{
+		TokenID:  utils.GenerateUUID(),
+		UserID:   user.UserID,
+		Token:    generatedToken,
+		AlivedAt: s.TokenGenerator.GetExpirationDate(),
 	})
 
 	if err != nil {
