@@ -117,6 +117,7 @@ type GetUserByIDParams struct {
 }
 
 func (s *ServiceImpl) GetUserByID(ctx context.Context, params *GetUserByIDParams) (*model.User, error) {
+	return nil, fmt.Errorf("unexpected")
 	user, err := s.Storage.User().GetUserByID(ctx, params.UserID)
 	if err != nil {
 		return nil, fmt.Errorf("get user by id: %w", err)

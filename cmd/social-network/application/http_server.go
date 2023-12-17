@@ -27,7 +27,7 @@ func (a *App) publicMux(env *env) *chi.Mux {
 	mux.Route("/user", func(r chi.Router) {
 		r.Use(env.authenticationService.AuthenticationInterceptor)
 
-		r.Get("/get/{userID}", handler.GetUserByID)
+		r.Get("/{userID}", handler.GetUserByID)
 	})
 
 	return mux

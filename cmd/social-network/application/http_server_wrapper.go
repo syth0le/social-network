@@ -4,14 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 	"log"
 	"net/http"
 	"os"
 	"social-network/cmd/social-network/configuration"
-	"social-network/internal/utils"
-
-	"github.com/go-chi/chi/v5"
-	"go.uber.org/zap"
 )
 
 type ServerOption struct {
@@ -56,12 +54,12 @@ func NewHTTPServerWrapper(logger *zap.Logger, opts ...HTTPServerOption) *HTTPSer
 	var servers []*http.Server
 
 	if options.adminServerOption != nil {
-		// todo make admin server
-		servers = append(servers, newNetHTTPServer(logger, options.adminServerOption.Port))
+		// todo make admin server elegant
+		servers = append(servers, newNetHTTPServer(logger, options.adminServerOption.Port, nil))
 	}
 
 	for _, option := range options.publicServersOption {
-		servers = append(servers, newNetHTTPServer(logger, option.Port))
+		servers = append(servers, newNetHTTPServer(logger, option.Port, option.Mux))
 	}
 
 	return &HTTPServerWrapper{
@@ -109,10 +107,13 @@ func (h *HTTPServerWrapper) GracefulStop() []func() error {
 	return response
 }
 
-func newNetHTTPServer(logger *zap.Logger, port int) *http.Server {
+func newNetHTTPServer(logger *zap.Logger, port int, incomeMux *chi.Mux) *http.Server {
 	// TODO: admin server wrapper
 	mux := chi.NewMux()
-	mux.Use(utils.LoggerMiddleware(logger))
+	mux.Use(LoggerMiddleware(logger))
+	if incomeMux != nil {
+		mux.Mount("/", incomeMux)
+	}
 	mux.Get("/ping", pingHandler())
 
 	return &http.Server{
@@ -125,5 +126,15 @@ func newNetHTTPServer(logger *zap.Logger, port int) *http.Server {
 func pingHandler() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("OK\n"))
+	}
+}
+
+func LoggerMiddleware(logger *zap.Logger) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			logger.Sugar().Infof("http request: %s%s", r.Host, r.RequestURI)
+			next.ServeHTTP(w, r)
+		})
+		return fn
 	}
 }

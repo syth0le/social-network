@@ -2,8 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"go.uber.org/zap"
-	"net/http"
 )
 
 type Level string
@@ -38,13 +36,3 @@ const (
 	Production  Environment = "prod"
 	Development Environment = "dev"
 )
-
-func LoggerMiddleware(logger *zap.Logger) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		fn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			logger.Sugar().Infof("http request: %s", r.RequestURI)
-			next.ServeHTTP(w, r)
-		})
-		return fn
-	}
-}
