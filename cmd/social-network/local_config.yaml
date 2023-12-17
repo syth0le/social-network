@@ -14,9 +14,12 @@ admin_server:
   port: 8081
 
 storage:
-  host: "localhost"
+  hosts:
+    - "localhost"
   port: 5432
-  database: "social-network-local"
-  username: "social-network-local-admin"
+  database: "postgres"
+  username: "postgres"
+#  database: "social-network-local"
+#  username: "social-network-local-admin"
   ssl_mode: "disable"
   connection_attempts: 3

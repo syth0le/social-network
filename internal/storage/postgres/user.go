@@ -59,6 +59,7 @@ func (s *Storage) CreateUser(ctx context.Context, params *model.UserRegister) (*
 }
 
 func (s *Storage) GetUserByID(ctx context.Context, id model.UserID) (*model.User, error) {
+	s.storage.logger.Sugar().Infof("some info for debug: %v", id)
 	sql, args, err := sq.Select(userFields...).
 		From(UserTable).
 		Where(sq.Eq{
@@ -71,24 +72,27 @@ func (s *Storage) GetUserByID(ctx context.Context, id model.UserID) (*model.User
 		return nil, fmt.Errorf("incorrect sql") // todo internal error
 	}
 
+	s.storage.logger.Sugar().Infof("some info for debug: %v", sql)
 	var entity userEntity
-	err = sqlx.GetContext(ctx, s.Slave(), &entity, sql, args...)
+	err = sqlx.GetContext(ctx, s.Master(), &entity, sql, args...)
 	if err != nil {
-		return nil, fmt.Errorf("internal error") // TODO: error wrapper SWITCH-CASE internal/not found
+		return nil, fmt.Errorf("internal error: %w", err) // TODO: error wrapper SWITCH-CASE internal/not found
 	}
 
 	return userEntityToModel(entity), nil
 }
 
 type userEntity struct {
-	ID         string    `db:"id"`
-	Username   string    `db:"username"`
-	FirstName  string    `db:"first_name"`
-	SecondName string    `db:"second_name"`
-	Sex        string    `db:"sex"`
-	Birthdate  time.Time `db:"birthdate"`
-	Biography  string    `db:"biography"`
-	City       string    `db:"city"`
+	ID             string    `db:"id"`
+	Username       string    `db:"username"`
+	HashedPassword string    `db:"hashed_password"`
+	FirstName      string    `db:"first_name"`
+	SecondName     string    `db:"second_name"`
+	Sex            string    `db:"sex"`
+	Birthdate      time.Time `db:"birthdate"`
+	Biography      string    `db:"biography"`
+	City           string    `db:"city"`
+	CreatedAt      time.Time `db:"created_at"`
 }
 
 func userEntityToModel(entity userEntity) *model.User {

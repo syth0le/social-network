@@ -18,7 +18,17 @@ type Handler struct {
 }
 
 func (h *Handler) writeError(ctx context.Context, w http.ResponseWriter, err error) {
-	http.Error(w, "internal error", http.StatusInternalServerError) // TODO: make error mapping
+	h.Logger.Sugar().Warnf("http response error: %v", err)
+
+	w.Header().Set(headers.ContentType, "application/json")
+	err = json.NewEncoder(w).Encode(
+		map[string]any{
+			"message": "error",
+			"code":    500, // todo
+		})
+	if err != nil {
+		http.Error(w, "internal error", http.StatusInternalServerError) // TODO: make error mapping
+	}
 }
 
 func writeResponse(w http.ResponseWriter, response any) {
