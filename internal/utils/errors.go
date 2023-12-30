@@ -22,7 +22,7 @@ func (e *ErrorResult) Error() string {
 	return e.Err.Error()
 }
 
-func WrapBadRequestError(err error) *ErrorResult {
+func WrapValidationError(err error) *ErrorResult {
 	return &ErrorResult{
 		Err:        err,
 		Msg:        ValidationErrorMessage,

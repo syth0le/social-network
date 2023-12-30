@@ -40,7 +40,7 @@ func (s *Storage) GetCurrentUserToken(ctx context.Context, id model.UserID) (*mo
 func (s *Storage) CreateToken(ctx context.Context, params *model.TokenWithMetadata) (*model.Token, error) {
 	err := params.Validate()
 	if err != nil {
-		return nil, utils.WrapBadRequestError(fmt.Errorf("params validate: %w", err))
+		return nil, utils.WrapValidationError(fmt.Errorf("params validate: %w", err))
 	}
 
 	now := time.Now().Truncate(time.Millisecond)

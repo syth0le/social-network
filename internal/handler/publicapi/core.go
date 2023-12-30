@@ -27,12 +27,13 @@ func (h *Handler) writeError(ctx context.Context, w http.ResponseWriter, err err
 		h.Logger.Error("cannot write log message")
 		return
 	}
+	w.WriteHeader(errorResult.StatusCode)
 	err = json.NewEncoder(w).Encode(
 		map[string]any{
 			"message": errorResult.Msg,
 			"code":    errorResult.StatusCode,
 		})
-	w.WriteHeader(errorResult.StatusCode)
+
 	if err != nil {
 		http.Error(w, utils.InternalErrorMessage, http.StatusInternalServerError) // TODO: make error mapping
 	}
@@ -51,14 +52,14 @@ func parseJSONRequest[T loginRequest | registerRequest](r *http.Request) (*T, er
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		err = fmt.Errorf("read body: %w", err)
-		return nil, err // TODO: wrap error to ValidationError
+		return nil, utils.WrapInternalError(err)
 	}
 
 	var request T
 	err = json.Unmarshal(body, &request)
 	if err != nil {
 		err = fmt.Errorf("unmarshal request body: %w", err)
-		return nil, err // TODO: wrap error to ValidationError
+		return nil, utils.WrapValidationError(err)
 	}
 	return &request, nil
 }
