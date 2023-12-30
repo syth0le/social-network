@@ -6,6 +6,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 	"social-network/internal/model"
+	"social-network/internal/utils"
 	"time"
 )
 
@@ -24,13 +25,13 @@ func (s *Storage) GetCurrentUserToken(ctx context.Context, id model.UserID) (*mo
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("incorrect sql") // todo internal error
+		return nil, utils.WrapInternalError(fmt.Errorf("incorrect sql"))
 	}
 
 	var entity tokenEntity
 	err = sqlx.GetContext(ctx, s.Slave(), &entity, sql, args...)
 	if err != nil {
-		return nil, fmt.Errorf("internal error") // TODO: error wrapper SWITCH-CASE internal/not found
+		return nil, utils.WrapSqlError(err)
 	}
 
 	return tokenEntityToModel(entity), nil
@@ -39,7 +40,7 @@ func (s *Storage) GetCurrentUserToken(ctx context.Context, id model.UserID) (*mo
 func (s *Storage) CreateToken(ctx context.Context, params *model.TokenWithMetadata) (*model.Token, error) {
 	err := params.Validate()
 	if err != nil {
-		return nil, fmt.Errorf("params validate: %w", err)
+		return nil, utils.WrapBadRequestError(fmt.Errorf("params validate: %w", err))
 	}
 
 	now := time.Now().Truncate(time.Millisecond)
@@ -50,13 +51,13 @@ func (s *Storage) CreateToken(ctx context.Context, params *model.TokenWithMetada
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("incorrect sql") // todo internal error
+		return nil, utils.WrapInternalError(fmt.Errorf("incorrect sql"))
 	}
 
 	var entity tokenEntity
 	err = sqlx.GetContext(ctx, s.Master(), &entity, sql, args...)
 	if err != nil {
-		return nil, fmt.Errorf("internal error") // TODO: error wrapper SWITCH-CASE internal/not found
+		return nil, utils.WrapSqlError(err)
 	}
 
 	return tokenEntityToModel(entity), nil
@@ -75,19 +76,19 @@ func (s *Storage) RevokeToken(ctx context.Context, params *model.Token) error {
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return fmt.Errorf("incorrect sql") // todo internal error
+		return utils.WrapInternalError(fmt.Errorf("incorrect sql"))
 	}
 
 	result, err := s.Master().ExecContext(ctx, sql, args...)
 	if err != nil {
-		return fmt.Errorf("internal error")
+		return utils.WrapSqlError(err)
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("internal error")
+		return utils.WrapInternalError(err)
 	}
 	if rowsAffected == 0 {
-		return fmt.Errorf("not found error")
+		return utils.WrapNotFoundError(err, utils.NotFoundMessage)
 	}
 
 	return nil
@@ -109,13 +110,13 @@ func (s *Storage) RefreshToken(ctx context.Context, params *model.TokenWithMetad
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("incorrect sql") // todo internal error
+		return nil, utils.WrapInternalError(fmt.Errorf("incorrect sql"))
 	}
 
 	var entity tokenEntity
 	err = sqlx.GetContext(ctx, s.Master(), &entity, sql, args...)
 	if err != nil {
-		return nil, fmt.Errorf("internal error") // TODO: error wrapper SWITCH-CASE internal/not found
+		return nil, utils.WrapSqlError(err)
 	}
 
 	return tokenEntityToModel(entity), nil

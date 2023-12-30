@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"social-network/internal/service/user"
+	"social-network/internal/utils"
 
 	"github.com/go-http-utils/headers"
 )
@@ -21,13 +22,19 @@ func (h *Handler) writeError(ctx context.Context, w http.ResponseWriter, err err
 	h.Logger.Sugar().Warnf("http response error: %v", err)
 
 	w.Header().Set(headers.ContentType, "application/json")
+	errorResult, ok := utils.FromError(err)
+	if !ok {
+		h.Logger.Error("cannot write log message")
+		return
+	}
 	err = json.NewEncoder(w).Encode(
 		map[string]any{
-			"message": "error",
-			"code":    500, // todo
+			"message": errorResult.Msg,
+			"code":    errorResult.StatusCode,
 		})
+	w.WriteHeader(errorResult.StatusCode)
 	if err != nil {
-		http.Error(w, "internal error", http.StatusInternalServerError) // TODO: make error mapping
+		http.Error(w, utils.InternalErrorMessage, http.StatusInternalServerError) // TODO: make error mapping
 	}
 }
 
@@ -35,7 +42,7 @@ func writeResponse(w http.ResponseWriter, response any) {
 	w.Header().Set(headers.ContentType, "application/json")
 	err := json.NewEncoder(w).Encode(response)
 	if err != nil {
-		http.Error(w, "internal error", http.StatusInternalServerError) // TODO: make error mapping
+		http.Error(w, utils.InternalErrorMessage, http.StatusInternalServerError) // TODO: make error mapping
 	}
 }
 

@@ -24,7 +24,7 @@ func NewGenerator(config configuration.ApplicationConfig) *Generator {
 
 func (g *Generator) GenerateToken(user *model.User) (string, error) {
 	if user == nil {
-		return "", fmt.Errorf("user cannot empty")
+		return "", fmt.Errorf("user cannot be empty")
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.MapClaims{

@@ -107,7 +107,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 	response, err := handleRequest()
 	if err != nil {
-		err := fmt.Errorf("login: %w", err)
+		err := fmt.Errorf("register: %w", err)
 		h.writeError(r.Context(), w, err)
 		return
 	}

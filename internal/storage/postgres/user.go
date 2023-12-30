@@ -6,6 +6,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 	"social-network/internal/model"
+	"social-network/internal/utils"
 	"time"
 )
 
@@ -22,13 +23,13 @@ func (s *Storage) LoginUser(ctx context.Context, userLogin *model.UserLogin) (*m
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("incorrect sql") // todo internal error
+		return nil, utils.WrapInternalError(fmt.Errorf("incorrect sql"))
 	}
 
 	var entity userEntity
 	err = sqlx.GetContext(ctx, s.Master(), &entity, sql, args...)
 	if err != nil {
-		return nil, fmt.Errorf("internal error")
+		return nil, utils.WrapSqlError(err)
 	}
 
 	return userEntityToModel(entity), nil
@@ -49,12 +50,12 @@ func (s *Storage) CreateUser(ctx context.Context, params *model.UserRegister) (*
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("incorrect sql") // todo internal error
+		return nil, utils.WrapInternalError(fmt.Errorf("incorrect sql"))
 	}
 	var entity userEntity
 	err = sqlx.GetContext(ctx, s.Slave(), &entity, sql, args...)
 	if err != nil {
-		return nil, fmt.Errorf("internal error")
+		return nil, utils.WrapSqlError(err)
 	}
 
 	return userEntityToModel(entity), nil
@@ -71,14 +72,13 @@ func (s *Storage) GetUserByID(ctx context.Context, id model.UserID) (*model.User
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("incorrect sql") // todo internal error
+		return nil, utils.WrapInternalError(fmt.Errorf("incorrect sql"))
 	}
 
-	s.storage.logger.Sugar().Infof("some info for debug: %v", sql)
 	var entity userEntity
 	err = sqlx.GetContext(ctx, s.Master(), &entity, sql, args...)
 	if err != nil {
-		return nil, fmt.Errorf("internal error: %w", err) // TODO: error wrapper SWITCH-CASE internal/not found
+		return nil, utils.WrapSqlError(err)
 	}
 
 	return userEntityToModel(entity), nil
