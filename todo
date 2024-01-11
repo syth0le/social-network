@@ -1,0 +1,6 @@
+1 makefile
+2 collections for postman
+3 make migrations step in docker-compose (for non-manual work)
+4 improve api handlers returns
+5 make master-slave configuration for postgres instances
+

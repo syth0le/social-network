@@ -1,0 +1,24 @@
+###
+
+# curl -X POST localhost:8080/user/register -d '{"username":"user", "password":"pass", "first_name":"name", "second_name": "name", "age": 10, "biography": "text", "city": "berlin", "birthdate": "2023-12-18T01:53:15.511Z"}'
+POST localhost:8080/user/register
+Content-Type: application/x-www-form-urlencoded
+
+{"username":"user", "password":"pass", "first_name":"name", "second_name": "name", "age": 10, "biography": "text", "city": "berlin", "birthdate": "2023-12-18T01:53:15.511Z"}
+
+###
+
+
+# curl -X POST localhost:8080/user/login -d '{"username":"user", "password":"pass"}'
+POST localhost:8080/user/login
+Content-Type: application/x-www-form-urlencoded
+
+{"username":"user", "password":"pass"}
+
+###
+
+# curl -X GET localhost:8080/user/snwbdf1a4c814434fa8b9888f9ba4341763
+GET localhost:8080/user/snwbdf1a4c814434fa8b9888f9ba4341763
+
+###
+

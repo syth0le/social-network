@@ -11,13 +11,13 @@ import (
 const ExpirationDuration = time.Hour * 24
 
 type Generator struct {
-	saltValue  string
+	saltValue  []byte
 	serverName string
 }
 
 func NewGenerator(config configuration.ApplicationConfig) *Generator {
 	return &Generator{
-		saltValue:  config.SaltValue,
+		saltValue:  []byte(config.SaltValue),
 		serverName: config.App,
 	}
 }

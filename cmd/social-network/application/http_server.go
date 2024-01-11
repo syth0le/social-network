@@ -28,6 +28,8 @@ func (a *App) publicMux(env *env) *chi.Mux {
 		r.Use(env.authenticationService.AuthenticationInterceptor)
 
 		r.Get("/{userID}", handler.GetUserByID)
+
+		r.Get("/search", handler.SearchUser)
 	})
 
 	return mux

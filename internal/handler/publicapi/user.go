@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"social-network/internal/model"
 	"social-network/internal/service/user"
+	"social-network/internal/utils"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -56,8 +57,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	response, err := handleRequest()
 	if err != nil {
-		err := fmt.Errorf("login: %w", err)
-		h.writeError(r.Context(), w, err)
+		h.writeError(r.Context(), w, fmt.Errorf("login: %w", err))
 		return
 	}
 	writeResponse(w, response)
@@ -107,8 +107,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 	response, err := handleRequest()
 	if err != nil {
-		err := fmt.Errorf("register: %w", err)
-		h.writeError(r.Context(), w, err)
+		h.writeError(r.Context(), w, fmt.Errorf("register: %w", err))
 		return
 	}
 	writeResponse(w, response)
@@ -131,8 +130,38 @@ func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 
 	response, err := handleRequest()
 	if err != nil {
-		err := fmt.Errorf("get user by id: %w", err)
-		h.writeError(r.Context(), w, err)
+		h.writeError(r.Context(), w, fmt.Errorf("get user by id: %w", err))
+		return
+	}
+	writeResponse(w, response)
+}
+
+func (h *Handler) SearchUser(w http.ResponseWriter, r *http.Request) {
+	handleRequest := func() (*userResponse, error) {
+		ctx := r.Context()
+		firstName := r.URL.Query().Get("first_name")
+		lastName := r.URL.Query().Get("last_name")
+		if firstName == "" {
+			return nil, utils.WrapValidationError(fmt.Errorf("incorrect query args. first_name cannot by empty"))
+		}
+		if lastName == "" {
+			return nil, utils.WrapValidationError(fmt.Errorf("incorrect query args. first_name cannot by empty"))
+		}
+
+		userModel, err := h.UserService.SearchUser(ctx, &user.SearchUserParams{
+			FirstName: firstName,
+			LastName:  lastName,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("search user: %w", err)
+		}
+
+		return userModelToResponse(userModel), nil
+	}
+
+	response, err := handleRequest()
+	if err != nil {
+		h.writeError(r.Context(), w, fmt.Errorf("search user: %w", err))
 		return
 	}
 	writeResponse(w, response)

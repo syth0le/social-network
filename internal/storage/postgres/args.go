@@ -11,7 +11,7 @@ const (
 )
 
 const (
-	returning = "RETURNING"
+	returning = "RETURNING "
 	separator = ","
 )
 

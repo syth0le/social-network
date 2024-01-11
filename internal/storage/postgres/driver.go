@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
@@ -9,6 +10,7 @@ import (
 	"go.uber.org/zap"
 	"golang.yandex/hasql"
 	"golang.yandex/hasql/checkers"
+	"log"
 	"social-network/cmd/social-network/configuration"
 	"strconv"
 	"strings"
@@ -24,7 +26,7 @@ type PGStorage struct {
 func NewPGStorage(logger *zap.Logger, cfg configuration.StorageConfig) (*PGStorage, error) {
 	cluster, err := newPGCluster(cfg)
 	if err != nil {
-		return nil, fmt.Errorf("new pg cluster")
+		return nil, fmt.Errorf("new pg cluster: %w", err)
 	}
 
 	return &PGStorage{
@@ -56,7 +58,6 @@ func newPGCluster(cfg configuration.StorageConfig) (*hasql.Cluster, error) {
 		if err != nil {
 			return nil, fmt.Errorf("parse connection config: %w", err)
 		}
-
 		db := sqlx.NewDb(stdlib.OpenDB(*parsedConnConfig), driverName)
 		nodes = append(nodes, hasql.NewNode(host, db.DB))
 	}
@@ -70,9 +71,8 @@ func newPGCluster(cfg configuration.StorageConfig) (*hasql.Cluster, error) {
 	defer cancelFunction()
 	_, err = cluster.WaitForPrimary(ctx)
 	if err != nil {
-		err = cluster.Close()
-		if err != nil {
-			return nil, fmt.Errorf("cluster close error: %w", err)
+		if closeErr := cluster.Close(); closeErr != nil {
+			return nil, fmt.Errorf("cluster close error: %w", closeErr)
 		}
 		return nil, fmt.Errorf("wait for primary timeout exceed: %w", err)
 	}
@@ -85,6 +85,7 @@ func constructConnectionString(host string, cfg configuration.StorageConfig) str
 		"port":     strconv.Itoa(cfg.Port),
 		"database": cfg.Database,
 		"user":     cfg.Username,
+		"password": cfg.Password,
 	}
 	if cfg.SSLMode != "" {
 		connectionMap["sslmode"] = cfg.SSLMode
@@ -94,6 +95,19 @@ func constructConnectionString(host string, cfg configuration.StorageConfig) str
 	for k, v := range connectionMap {
 		connectionSlice = append(connectionSlice, fmt.Sprintf("%s=%s", k, v))
 	}
-
 	return strings.Join(connectionSlice, " ")
+}
+
+// todo: delete
+func example(connStr string) {
+	db, err := sql.Open("pgx", connStr)
+	if err != nil {
+		log.Fatalf("Unable to connect to database because %s", err)
+	}
+
+	if err = db.Ping(); err != nil {
+		log.Fatalf("Cannot ping database because %s", err)
+	}
+
+	log.Println("Successfully connected to database and pinged it")
 }

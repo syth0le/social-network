@@ -15,6 +15,7 @@ type Service interface {
 	Login(ctx context.Context, params *LoginParams) (*model.Token, error)
 	Register(ctx context.Context, params *RegisterParams) (*model.Token, error)
 	GetUserByID(ctx context.Context, params *GetUserByIDParams) (*model.User, error)
+	SearchUser(ctx context.Context, params *SearchUserParams) (*model.User, error)
 }
 
 type ServiceImpl struct {
@@ -118,6 +119,20 @@ type GetUserByIDParams struct {
 
 func (s *ServiceImpl) GetUserByID(ctx context.Context, params *GetUserByIDParams) (*model.User, error) {
 	user, err := s.Storage.User().GetUserByID(ctx, params.UserID)
+	if err != nil {
+		return nil, fmt.Errorf("get user by id: %w", err)
+	}
+
+	return user, nil
+}
+
+type SearchUserParams struct {
+	FirstName string
+	LastName  string
+}
+
+func (s *ServiceImpl) SearchUser(ctx context.Context, params *SearchUserParams) (*model.User, error) {
+	user, err := s.Storage.User().SearchUser(ctx, params.FirstName, params.LastName)
 	if err != nil {
 		return nil, fmt.Errorf("get user by id: %w", err)
 	}

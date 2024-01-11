@@ -1,9 +1,12 @@
 package utils
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"strings"
+)
 
 const serviceNamePrefix = "snw"
 
 func GenerateUUID() string {
-	return serviceNamePrefix + uuid.New().String()
+	return serviceNamePrefix + strings.Replace(uuid.New().String(), "-", "", -1)
 }

@@ -15,11 +15,17 @@ admin_server:
 
 storage:
   hosts:
-    - "localhost"
+    - "master"
+    - "slave"
   port: 5432
-  database: "postgres"
-  username: "postgres"
-#  database: "social-network-local"
-#  username: "social-network-local-admin"
+#  database: "postgres"
+#  username: "postgres"
+  database: "social-network-local"
+  username: "social-network-local-admin"
+  password: "eepha[l3eaph8Xo"
   ssl_mode: "disable"
   connection_attempts: 3
+
+application:
+  app: "social-network"
+  salt_value: "xamah6Ael!iat0n"

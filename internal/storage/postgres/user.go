@@ -53,7 +53,7 @@ func (s *Storage) CreateUser(ctx context.Context, params *model.UserRegister) (*
 		return nil, utils.WrapInternalError(fmt.Errorf("incorrect sql"))
 	}
 	var entity userEntity
-	err = sqlx.GetContext(ctx, s.Slave(), &entity, sql, args...)
+	err = sqlx.GetContext(ctx, s.Master(), &entity, sql, args...)
 	if err != nil {
 		return nil, utils.WrapSqlError(err)
 	}
@@ -76,7 +76,30 @@ func (s *Storage) GetUserByID(ctx context.Context, id model.UserID) (*model.User
 	}
 
 	var entity userEntity
-	err = sqlx.GetContext(ctx, s.Master(), &entity, sql, args...)
+	err = sqlx.GetContext(ctx, s.Slave(), &entity, sql, args...)
+	if err != nil {
+		return nil, utils.WrapSqlError(err)
+	}
+
+	return userEntityToModel(entity), nil
+}
+
+func (s *Storage) SearchUser(ctx context.Context, firstName, lastName string) (*model.User, error) {
+	sql, args, err := sq.Select(userFields...).
+		From(UserTable).
+		Where(sq.Eq{
+			fieldFirstName:  firstName,
+			fieldSecondName: lastName,
+			fieldDeletedAt:  nil,
+		}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, utils.WrapInternalError(fmt.Errorf("incorrect sql"))
+	}
+
+	var entity userEntity
+	err = sqlx.GetContext(ctx, s.Slave(), &entity, sql, args...)
 	if err != nil {
 		return nil, utils.WrapSqlError(err)
 	}
