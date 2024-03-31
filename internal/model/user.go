@@ -2,8 +2,9 @@ package model
 
 import (
 	"fmt"
-	"gopkg.in/validator.v2"
 	"time"
+
+	"gopkg.in/validator.v2"
 )
 
 type UserID string
@@ -19,30 +20,25 @@ func (id TokenID) String() string {
 }
 
 type User struct {
-	UserID     UserID
-	Username   string
-	FirstName  string
-	SecondName string
-	Sex        string
-	Birthdate  time.Time
-	Biography  string
-	City       string
+	UserID         UserID
+	Username       string
+	HashedPassword string
+	FirstName      string
+	SecondName     string
+	Sex            string
+	Birthdate      time.Time
+	Biography      string
+	City           string
 }
 
 type Token struct {
-	TokenID TokenID
-	UserID  UserID
-	Token   string
+	TokenID        TokenID   `validator:"nonzero"`
+	UserID         UserID    `validator:"nonzero"`
+	Token          string    `validator:"nonzero"`
+	ExpirationDate time.Time `validator:"nonzero"`
 }
 
-type TokenWithMetadata struct {
-	TokenID  string    `validator:"nonzero"`
-	UserID   UserID    `validator:"nonzero"`
-	Token    string    `validator:"nonzero"`
-	AlivedAt time.Time `validator:"nonzero"`
-}
-
-func (t *TokenWithMetadata) Validate() error {
+func (t *Token) Validate() error {
 	if err := validator.Validate(t); err != nil {
 		return fmt.Errorf("validate: %w", err)
 	}
@@ -50,8 +46,7 @@ func (t *TokenWithMetadata) Validate() error {
 }
 
 type UserLogin struct {
-	Username       string
-	HashedPassword string
+	Username string
 }
 
 type UserRegister struct {

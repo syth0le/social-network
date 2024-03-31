@@ -16,13 +16,12 @@ admin_server:
 storage:
   hosts:
     - "master"
-    - "slave"
+#    - "slave"
   port: 5432
-#  database: "postgres"
-#  username: "postgres"
+  # database: "postgres"
+  # username: "postgres"
   database: "social-network-local"
   username: "social-network-local-admin"
-  password: "eepha[l3eaph8Xo"
   ssl_mode: "disable"
   connection_attempts: 3
 

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS user_table
 (
     id              TEXT                     NOT NULL,
-    username        TEXT                     NOT NULL,
+    username        TEXT UNIQUE              NOT NULL,
     hashed_password TEXT                     NOT NULL,
     first_name      TEXT                     NOT NULL,
     second_name     TEXT                     NOT NULL,

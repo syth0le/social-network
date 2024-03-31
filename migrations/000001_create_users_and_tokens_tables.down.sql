@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS user_table;
+DROP TABLE IF EXISTS token_table;

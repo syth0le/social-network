@@ -3,11 +3,13 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"time"
+
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
+
 	"social-network/internal/model"
 	"social-network/internal/utils"
-	"time"
 )
 
 func (s *Storage) GetCurrentUserToken(ctx context.Context, id model.UserID) (*model.Token, error) {
@@ -37,7 +39,7 @@ func (s *Storage) GetCurrentUserToken(ctx context.Context, id model.UserID) (*mo
 	return tokenEntityToModel(entity), nil
 }
 
-func (s *Storage) CreateToken(ctx context.Context, params *model.TokenWithMetadata) (*model.Token, error) {
+func (s *Storage) CreateToken(ctx context.Context, params *model.Token) (*model.Token, error) {
 	err := params.Validate()
 	if err != nil {
 		return nil, utils.WrapValidationError(fmt.Errorf("params validate: %w", err))
@@ -46,7 +48,7 @@ func (s *Storage) CreateToken(ctx context.Context, params *model.TokenWithMetada
 	now := time.Now().Truncate(time.Millisecond)
 	sql, args, err := sq.Insert(TokenTable).
 		Columns(tokenFields...).
-		Values(params.TokenID, params.UserID, params.Token, now, params.AlivedAt).
+		Values(params.TokenID, params.UserID, params.Token, now, params.ExpirationDate).
 		Suffix(returningToken).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
@@ -94,7 +96,7 @@ func (s *Storage) RevokeToken(ctx context.Context, params *model.Token) error {
 	return nil
 }
 
-func (s *Storage) RefreshToken(ctx context.Context, params *model.TokenWithMetadata) (*model.Token, error) {
+func (s *Storage) RefreshToken(ctx context.Context, params *model.Token) (*model.Token, error) {
 	err := params.Validate()
 	if err != nil {
 		return nil, fmt.Errorf("params validate: %w", err)
@@ -105,7 +107,7 @@ func (s *Storage) RefreshToken(ctx context.Context, params *model.TokenWithMetad
 			fieldUserID:    params.UserID.String(),
 			fieldDeletedAt: nil,
 		}).
-		Set(fieldAlivedAt, params.AlivedAt).
+		Set(fieldAlivedAt, params.ExpirationDate).
 		Suffix(returningToken).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
@@ -123,13 +125,18 @@ func (s *Storage) RefreshToken(ctx context.Context, params *model.TokenWithMetad
 }
 
 type tokenEntity struct {
-	UserID string `db:"user_id"`
-	Token  string `db:"token"`
+	ID        string    `db:"id"`
+	UserID    string    `db:"user_id"`
+	Token     string    `db:"token"`
+	CreatedAt time.Time `db:"created_at"`
+	AlivedAt  time.Time `db:"alived_at"`
 }
 
 func tokenEntityToModel(entity tokenEntity) *model.Token {
 	return &model.Token{
-		UserID: model.UserID(entity.UserID),
-		Token:  entity.Token,
+		TokenID:        model.TokenID(entity.ID),
+		UserID:         model.UserID(entity.UserID),
+		Token:          entity.Token,
+		ExpirationDate: entity.AlivedAt,
 	}
 }

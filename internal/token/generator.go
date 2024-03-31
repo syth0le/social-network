@@ -2,13 +2,16 @@ package token
 
 import (
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
+	"time"
+
 	"social-network/cmd/social-network/configuration"
 	"social-network/internal/model"
-	"time"
+	"social-network/internal/utils"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
-const ExpirationDuration = time.Hour * 24
+const ExpirationDuration = time.Hour * 24 // todo: get expiration time from settings
 
 type Generator struct {
 	saltValue  []byte
@@ -22,25 +25,33 @@ func NewGenerator(config configuration.ApplicationConfig) *Generator {
 	}
 }
 
-func (g *Generator) GenerateToken(user *model.User) (string, error) {
+func (g *Generator) GenerateToken(user *model.User) (*model.Token, error) {
 	if user == nil {
-		return "", fmt.Errorf("user cannot be empty")
+		return nil, fmt.Errorf("user cannot be empty")
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.MapClaims{
-		"iss":      g.serverName,
-		"sub":      user.Username,
-		"sub_name": user.FirstName,
+	expirationDate := g.getExpirationDate()
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"iss":        g.serverName,
+		"sub":        user.Username,
+		"sub_name":   user.FirstName,
+		"expires_at": expirationDate.Unix(),
 	})
 
-	s, err := token.SignedString(g.saltValue)
+	tokenString, err := token.SignedString(g.saltValue)
 	if err != nil {
-		return "", fmt.Errorf("signed string: %w", err)
+		return nil, fmt.Errorf("signed string: %w", err)
 	}
 
-	return s, nil
+	return &model.Token{
+		TokenID:        model.TokenID(utils.GenerateUUID()),
+		UserID:         user.UserID,
+		Token:          tokenString,
+		ExpirationDate: expirationDate,
+	}, nil
 }
 
-func (g *Generator) GetExpirationDate() time.Time {
+func (g *Generator) getExpirationDate() time.Time {
 	return time.Now().Add(ExpirationDuration)
 }

@@ -3,22 +3,23 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"time"
+
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
+
 	"social-network/internal/model"
 	"social-network/internal/utils"
-	"time"
 )
 
 // TODO: tests
 
-func (s *Storage) LoginUser(ctx context.Context, userLogin *model.UserLogin) (*model.User, error) {
+func (s *Storage) GetUserByLogin(ctx context.Context, userLogin *model.UserLogin) (*model.User, error) {
 	sql, args, err := sq.Select(userFields...).
 		From(UserTable).
 		Where(sq.Eq{
-			fieldUsername:       userLogin.Username,
-			fieldHashedPassword: userLogin.HashedPassword,
-			fieldDeletedAt:      nil,
+			fieldUsername:  userLogin.Username,
+			fieldDeletedAt: nil,
 		}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
@@ -122,13 +123,14 @@ type userEntity struct {
 
 func userEntityToModel(entity userEntity) *model.User {
 	return &model.User{
-		UserID:     model.UserID(entity.ID),
-		Username:   entity.Username,
-		FirstName:  entity.FirstName,
-		SecondName: entity.SecondName,
-		Sex:        entity.Sex,
-		Birthdate:  entity.Birthdate,
-		Biography:  entity.Biography,
-		City:       entity.City,
+		UserID:         model.UserID(entity.ID),
+		Username:       entity.Username,
+		HashedPassword: entity.HashedPassword,
+		FirstName:      entity.FirstName,
+		SecondName:     entity.SecondName,
+		Sex:            entity.Sex,
+		Birthdate:      entity.Birthdate,
+		Biography:      entity.Biography,
+		City:           entity.City,
 	}
 }

@@ -29,17 +29,16 @@ type LoginParams struct {
 }
 
 func (s *ServiceImpl) Login(ctx context.Context, params *LoginParams) (*model.Token, error) {
-	hashedPassword, err := utils.HashPassword(params.Password)
-	if err != nil {
-		return nil, fmt.Errorf("hash password: %w", err)
-	}
-
-	user, err := s.Storage.User().LoginUser(ctx, &model.UserLogin{
-		Username:       params.Username,
-		HashedPassword: hashedPassword,
+	//TODO: make atomic transaction
+	user, err := s.Storage.User().GetUserByLogin(ctx, &model.UserLogin{
+		Username: params.Username,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("login user: %w", err)
+	}
+
+	if err = utils.CheckPasswordHash(user.HashedPassword, params.Password); err != nil {
+		return nil, utils.WrapNotFoundError(fmt.Errorf("not correct password: %w", err), "not correct credentials")
 	}
 
 	generatedToken, err := s.TokenGenerator.GenerateToken(user)
@@ -47,12 +46,7 @@ func (s *ServiceImpl) Login(ctx context.Context, params *LoginParams) (*model.To
 		return nil, fmt.Errorf("generate token: %w", err)
 	}
 
-	token, err := s.Storage.Token().CreateToken(ctx, &model.TokenWithMetadata{
-		TokenID:  utils.GenerateUUID(),
-		UserID:   user.UserID,
-		Token:    generatedToken,
-		AlivedAt: s.TokenGenerator.GetExpirationDate(),
-	})
+	token, err := s.Storage.Token().CreateToken(ctx, generatedToken)
 
 	if err != nil {
 		return nil, fmt.Errorf("create token: %w", err)
@@ -99,13 +93,7 @@ func (s *ServiceImpl) Register(ctx context.Context, params *RegisterParams) (*mo
 		return nil, fmt.Errorf("generate token: %w", err)
 	}
 
-	token, err := s.Storage.Token().CreateToken(ctx, &model.TokenWithMetadata{
-		TokenID:  utils.GenerateUUID(),
-		UserID:   user.UserID,
-		Token:    generatedToken,
-		AlivedAt: s.TokenGenerator.GetExpirationDate(),
-	})
-
+	token, err := s.Storage.Token().CreateToken(ctx, generatedToken)
 	if err != nil {
 		return nil, fmt.Errorf("create token: %w", err)
 	}
