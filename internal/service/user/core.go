@@ -47,7 +47,6 @@ func (s *ServiceImpl) Login(ctx context.Context, params *LoginParams) (*model.To
 	}
 
 	token, err := s.Storage.Token().CreateToken(ctx, generatedToken)
-
 	if err != nil {
 		return nil, fmt.Errorf("create token: %w", err)
 	}

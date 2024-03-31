@@ -2,18 +2,18 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 	"golang.yandex/hasql"
 	"golang.yandex/hasql/checkers"
-	"log"
+
 	"social-network/cmd/social-network/configuration"
-	"strconv"
-	"strings"
 )
 
 const driverName = "pgx"
@@ -96,18 +96,4 @@ func constructConnectionString(host string, cfg configuration.StorageConfig) str
 		connectionSlice = append(connectionSlice, fmt.Sprintf("%s=%s", k, v))
 	}
 	return strings.Join(connectionSlice, " ")
-}
-
-// todo: delete
-func example(connStr string) {
-	db, err := sql.Open("pgx", connStr)
-	if err != nil {
-		log.Fatalf("Unable to connect to database because %s", err)
-	}
-
-	if err = db.Ping(); err != nil {
-		log.Fatalf("Cannot ping database because %s", err)
-	}
-
-	log.Println("Successfully connected to database and pinged it")
 }

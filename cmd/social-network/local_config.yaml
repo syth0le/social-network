@@ -18,8 +18,6 @@ storage:
     - "master"
 #    - "slave"
   port: 5432
-  # database: "postgres"
-  # username: "postgres"
   database: "social-network-local"
   username: "social-network-local-admin"
   ssl_mode: "disable"
