@@ -11,7 +11,7 @@ services:
       - "8080:8080"
       - "8081:8081"
     env_file:
-      - .env.example
+      - .env
     environment:
       - DB_PASSWORD=${DB_PASSWORD}
       - JWT_TOKEN_SALT=${JWT_TOKEN_SALT}
@@ -26,7 +26,7 @@ services:
     image: postgres:latest
     container_name: "master"
     env_file:
-      - .env.example
+      - .env
     volumes:
       - postgres-db-master:/var/lib/postgresql/data
     environment:
@@ -60,7 +60,7 @@ services:
 #    image: postgres:latest
 #    container_name: "slave"
 #    env_file:
-#      - .env.example
+#      - .env
 #    volumes:
 #      - postgres-db-slave:/var/lib/postgresql/data
 #    environment:
