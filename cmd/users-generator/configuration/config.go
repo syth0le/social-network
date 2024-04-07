@@ -1,8 +1,6 @@
 package configuration
 
 import (
-	"time"
-
 	xstorage "github.com/syth0le/gopnik/db/postgres"
 	xlogger "github.com/syth0le/gopnik/logger"
 )
@@ -18,9 +16,8 @@ func (c *Config) Validate() error {
 }
 
 type ApplicationConfig struct {
-	GracefulShutdownTimeout time.Duration `yaml:"graceful_shutdown_timeout"`
-	ForceShutdownTimeout    time.Duration `yaml:"force_shutdown_timeout"`
-	App                     string        `yaml:"app"`
+	App      string `yaml:"app"`
+	DataFile string `yaml:"data_file"`
 }
 
 func (c *ApplicationConfig) Validate() error {

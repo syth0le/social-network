@@ -28,3 +28,5 @@ migrate-slave-pgmigrate:
 migrate-pgmigrate:
 	migrate-master-pgmigrate & migrate-slave-pgmigrate
 
+generate-data:
+	cd cmd/users-generator && go build && ./users-generator --config=local_config.yaml

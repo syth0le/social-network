@@ -89,8 +89,8 @@ func (s *Storage) SearchUser(ctx context.Context, firstName, secondName string) 
 	sql, args, err := sq.Select(userFields...).
 		From(UserTable).
 		Where(sq.And{
-			sq.Like{fieldFirstName: firstName + "%"},
-			sq.Like{fieldSecondName: secondName + "%"},
+			sq.ILike{fieldFirstName: firstName + "%"},
+			sq.ILike{fieldSecondName: secondName + "%"},
 			sq.Eq{
 				fieldDeletedAt: nil,
 			},
@@ -108,6 +108,33 @@ func (s *Storage) SearchUser(ctx context.Context, firstName, secondName string) 
 	}
 
 	return userEntitiesToModels(entities), nil
+}
+
+func (s *Storage) BatchCreateUser(ctx context.Context, users []*model.UserRegister) error {
+	now := time.Now().Truncate(time.Millisecond)
+	query := sq.Insert(UserTable).
+		Columns(userFields...)
+
+	for _, user := range users {
+		query = query.Values(user.ID, user.Username, user.HashedPassword, user.FirstName, user.SecondName,
+			user.Sex, user.Birthdate, user.Biography, user.City, now)
+	}
+
+	sql, args, err := query.
+		Suffix(returningUser).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
+	}
+
+	_, err = s.Master().ExecContext(ctx, sql, args...)
+	if err != nil {
+		return xerrors.WrapSqlError(err)
+	}
+
+	return nil
 }
 
 type userEntity struct {

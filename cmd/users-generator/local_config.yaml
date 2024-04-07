@@ -5,10 +5,14 @@ logger:
 
 storage:
   hosts:
-    - "master"
+    - "localhost"
 #    - "slave"
-  port: 5432
+  port: 6432
   database: "social-network-local"
   username: "social-network-local-admin"
   ssl_mode: "disable"
   connection_attempts: 3
+  password: "eephayl3eaph8Xo"
+
+application:
+  data_file: "people.csv"

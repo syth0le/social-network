@@ -16,6 +16,7 @@ type UserRepository interface {
 	CreateUser(ctx context.Context, user *model.UserRegister) (*model.User, error)
 	GetUserByID(ctx context.Context, id model.UserID) (*model.User, error)
 	SearchUser(ctx context.Context, firstName, lastName string) ([]*model.User, error)
+	BatchCreateUser(ctx context.Context, user []*model.UserRegister) error
 }
 
 type TokenRepository interface {

@@ -20,9 +20,8 @@ func NewDefaultConfig() *Config {
 			Environment: xlogger.Development,
 		},
 		Application: ApplicationConfig{
-			GracefulShutdownTimeout: 15 * time.Second,
-			ForceShutdownTimeout:    20 * time.Second,
-			App:                     defaultAppName,
+			App:      defaultAppName,
+			DataFile: "",
 		},
 		Storage: xstorage.StorageConfig{
 			EnableMock:            false,

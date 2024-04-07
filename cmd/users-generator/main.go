@@ -28,7 +28,7 @@ func main() {
 		log.Fatalf("failed to create logger: %v", err)
 	}
 
-	app := application.New(cfg, logger) // TODO: closures
+	app := application.New(cfg, logger)
 	if err = app.Run(); err != nil {
 		logger.Sugar().Fatalf("application stopped with error: %v", err)
 	} else {
