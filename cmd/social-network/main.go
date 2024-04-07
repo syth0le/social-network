@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
+
 	"social-network/cmd/social-network/application"
 	"social-network/cmd/social-network/configuration"
-	"social-network/internal/utils"
+
+	xlogger "github.com/syth0le/gopnik/logger"
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/spf13/pflag"
@@ -35,16 +37,16 @@ func main() {
 	}
 }
 
-func constructLogger(cfg configuration.LoggerConfig) (*zap.Logger, error) {
+func constructLogger(cfg xlogger.LoggerConfig) (*zap.Logger, error) {
 	var logger *zap.Logger
 	var err error
 	switch cfg.Environment {
-	case utils.Development:
+	case xlogger.Development:
 		logger, err = zap.NewDevelopment()
 		if err != nil {
 			return nil, fmt.Errorf("new development logger")
 		}
-	case utils.Production:
+	case xlogger.Production:
 		logger, err = zap.NewProduction()
 		if err != nil {
 			return nil, fmt.Errorf("new production logger")

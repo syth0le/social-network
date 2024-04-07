@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	xerrors "github.com/syth0le/gopnik/errors"
+
 	"social-network/internal/model"
 	"social-network/internal/storage"
 	"social-network/internal/token"
@@ -15,7 +17,7 @@ type Service interface {
 	Login(ctx context.Context, params *LoginParams) (*model.Token, error)
 	Register(ctx context.Context, params *RegisterParams) (*model.Token, error)
 	GetUserByID(ctx context.Context, params *GetUserByIDParams) (*model.User, error)
-	SearchUser(ctx context.Context, params *SearchUserParams) (*model.User, error)
+	SearchUser(ctx context.Context, params *SearchUserParams) ([]*model.User, error)
 }
 
 type ServiceImpl struct {
@@ -38,7 +40,7 @@ func (s *ServiceImpl) Login(ctx context.Context, params *LoginParams) (*model.To
 	}
 
 	if err = utils.CheckPasswordHash(user.HashedPassword, params.Password); err != nil {
-		return nil, utils.WrapNotFoundError(fmt.Errorf("not correct password: %w", err), "not correct credentials")
+		return nil, xerrors.WrapNotFoundError(fmt.Errorf("not correct password: %w", err), "not correct credentials")
 	}
 
 	generatedToken, err := s.TokenGenerator.GenerateToken(user)
@@ -114,14 +116,14 @@ func (s *ServiceImpl) GetUserByID(ctx context.Context, params *GetUserByIDParams
 }
 
 type SearchUserParams struct {
-	FirstName string
-	LastName  string
+	FirstName  string
+	SecondName string
 }
 
-func (s *ServiceImpl) SearchUser(ctx context.Context, params *SearchUserParams) (*model.User, error) {
-	user, err := s.Storage.User().SearchUser(ctx, params.FirstName, params.LastName)
+func (s *ServiceImpl) SearchUser(ctx context.Context, params *SearchUserParams) ([]*model.User, error) {
+	user, err := s.Storage.User().SearchUser(ctx, params.FirstName, params.SecondName)
 	if err != nil {
-		return nil, fmt.Errorf("get user by id: %w", err)
+		return nil, fmt.Errorf("search user: %w", err)
 	}
 
 	return user, nil

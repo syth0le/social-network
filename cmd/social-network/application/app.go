@@ -3,26 +3,30 @@ package application
 import (
 	"context"
 	"fmt"
+	"syscall"
+
 	"go.uber.org/zap"
+
 	"social-network/cmd/social-network/configuration"
 	"social-network/internal/authentication"
 	"social-network/internal/service/user"
 	"social-network/internal/storage/postgres"
 	"social-network/internal/token"
-	"syscall"
+
+	xcloser "github.com/syth0le/gopnik/closer"
 )
 
 type App struct {
 	Config *configuration.Config
 	Logger *zap.Logger
-	Closer *Closer
+	Closer *xcloser.Closer
 }
 
 func New(cfg *configuration.Config, logger *zap.Logger) *App {
 	return &App{
 		Config: cfg,
 		Logger: logger,
-		Closer: NewCloser(logger, cfg.Application.GracefulShutdownTimeout, syscall.SIGINT, syscall.SIGTERM),
+		Closer: xcloser.NewCloser(logger, cfg.Application.GracefulShutdownTimeout, cfg.Application.ForceShutdownTimeout, syscall.SIGINT, syscall.SIGTERM),
 	}
 }
 

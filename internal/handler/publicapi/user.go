@@ -3,12 +3,15 @@ package publicapi
 import (
 	"fmt"
 	"net/http"
-	"social-network/internal/model"
-	"social-network/internal/service/user"
-	"social-network/internal/utils"
+
+	xerrors "github.com/syth0le/gopnik/errors"
+
 	"time"
 
 	"github.com/go-chi/chi/v5"
+
+	"social-network/internal/model"
+	"social-network/internal/service/user"
 )
 
 type jwtTokenResponse struct {
@@ -25,6 +28,11 @@ type userResponse struct {
 	Birthdate  string `json:"birthdate"`
 	Biography  string `json:"biography"`
 	City       string `json:"city"`
+}
+
+// todo pagination
+type userListResponse struct {
+	Users []*userResponse `json:"users"`
 }
 
 type loginRequest struct {
@@ -137,26 +145,26 @@ func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) SearchUser(w http.ResponseWriter, r *http.Request) {
-	handleRequest := func() (*userResponse, error) {
+	handleRequest := func() (*userListResponse, error) {
 		ctx := r.Context()
 		firstName := r.URL.Query().Get("first_name")
-		lastName := r.URL.Query().Get("last_name")
+		secondName := r.URL.Query().Get("second_name")
 		if firstName == "" {
-			return nil, utils.WrapValidationError(fmt.Errorf("incorrect query args. first_name cannot by empty"))
+			return nil, xerrors.WrapValidationError(fmt.Errorf("incorrect query args. firstName cannot by empty"))
 		}
-		if lastName == "" {
-			return nil, utils.WrapValidationError(fmt.Errorf("incorrect query args. first_name cannot by empty"))
+		if secondName == "" {
+			return nil, xerrors.WrapValidationError(fmt.Errorf("incorrect query args. secondName cannot by empty"))
 		}
 
 		userModel, err := h.UserService.SearchUser(ctx, &user.SearchUserParams{
-			FirstName: firstName,
-			LastName:  lastName,
+			FirstName:  firstName,
+			SecondName: secondName,
 		})
 		if err != nil {
 			return nil, fmt.Errorf("search user: %w", err)
 		}
 
-		return userModelToResponse(userModel), nil
+		return userModelsToResponse(userModel), nil
 	}
 
 	response, err := handleRequest()
@@ -177,5 +185,15 @@ func userModelToResponse(user *model.User) *userResponse {
 		Birthdate:  user.Birthdate.String(),
 		Biography:  user.Biography,
 		City:       user.City,
+	}
+}
+
+func userModelsToResponse(userModels []*model.User) *userListResponse {
+	users := make([]*userResponse, 0)
+	for _, userModel := range userModels {
+		users = append(users, userModelToResponse(userModel))
+	}
+	return &userListResponse{
+		Users: users,
 	}
 }

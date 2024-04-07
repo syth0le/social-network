@@ -7,9 +7,9 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
+	xerrors "github.com/syth0le/gopnik/errors"
 
 	"social-network/internal/model"
-	"social-network/internal/utils"
 )
 
 // TODO: tests
@@ -24,13 +24,13 @@ func (s *Storage) GetUserByLogin(ctx context.Context, userLogin *model.UserLogin
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, utils.WrapInternalError(fmt.Errorf("incorrect sql"))
+		return nil, xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
 	}
 
 	var entity userEntity
 	err = sqlx.GetContext(ctx, s.Master(), &entity, sql, args...)
 	if err != nil {
-		return nil, utils.WrapSqlError(err)
+		return nil, xerrors.WrapSqlError(err)
 	}
 
 	return userEntityToModel(entity), nil
@@ -51,19 +51,19 @@ func (s *Storage) CreateUser(ctx context.Context, params *model.UserRegister) (*
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, utils.WrapInternalError(fmt.Errorf("incorrect sql"))
+		return nil, xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
 	}
 	var entity userEntity
 	err = sqlx.GetContext(ctx, s.Master(), &entity, sql, args...)
 	if err != nil {
-		return nil, utils.WrapSqlError(err)
+		return nil, xerrors.WrapSqlError(err)
 	}
 
 	return userEntityToModel(entity), nil
 }
 
 func (s *Storage) GetUserByID(ctx context.Context, id model.UserID) (*model.User, error) {
-	s.storage.logger.Sugar().Infof("some info for debug: %v", id)
+	//s.storage.logger.Sugar().Infof("some info for debug: %v", id) TODO make storage logger
 	sql, args, err := sq.Select(userFields...).
 		From(UserTable).
 		Where(sq.Eq{
@@ -73,39 +73,41 @@ func (s *Storage) GetUserByID(ctx context.Context, id model.UserID) (*model.User
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, utils.WrapInternalError(fmt.Errorf("incorrect sql"))
+		return nil, xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
 	}
 
 	var entity userEntity
 	err = sqlx.GetContext(ctx, s.Slave(), &entity, sql, args...)
 	if err != nil {
-		return nil, utils.WrapSqlError(err)
+		return nil, xerrors.WrapSqlError(err)
 	}
 
 	return userEntityToModel(entity), nil
 }
 
-func (s *Storage) SearchUser(ctx context.Context, firstName, lastName string) (*model.User, error) {
+func (s *Storage) SearchUser(ctx context.Context, firstName, secondName string) ([]*model.User, error) {
 	sql, args, err := sq.Select(userFields...).
 		From(UserTable).
-		Where(sq.Eq{
-			fieldFirstName:  firstName,
-			fieldSecondName: lastName,
-			fieldDeletedAt:  nil,
+		Where(sq.And{
+			sq.Like{fieldFirstName: firstName + "%"},
+			sq.Like{fieldSecondName: secondName + "%"},
+			sq.Eq{
+				fieldDeletedAt: nil,
+			},
 		}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, utils.WrapInternalError(fmt.Errorf("incorrect sql"))
+		return nil, xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
 	}
 
-	var entity userEntity
-	err = sqlx.GetContext(ctx, s.Slave(), &entity, sql, args...)
+	var entities []userEntity
+	err = sqlx.SelectContext(ctx, s.Slave(), &entities, sql, args...)
 	if err != nil {
-		return nil, utils.WrapSqlError(err)
+		return nil, xerrors.WrapSqlError(err)
 	}
 
-	return userEntityToModel(entity), nil
+	return userEntitiesToModels(entities), nil
 }
 
 type userEntity struct {
@@ -133,4 +135,12 @@ func userEntityToModel(entity userEntity) *model.User {
 		Biography:      entity.Biography,
 		City:           entity.City,
 	}
+}
+
+func userEntitiesToModels(entities []userEntity) []*model.User {
+	var userModels []*model.User
+	for _, entity := range entities {
+		userModels = append(userModels, userEntityToModel(entity))
+	}
+	return userModels
 }

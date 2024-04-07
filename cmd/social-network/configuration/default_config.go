@@ -1,8 +1,11 @@
 package configuration
 
 import (
-	"social-network/internal/utils"
 	"time"
+
+	xstorage "github.com/syth0le/gopnik/db/postgres"
+	xlogger "github.com/syth0le/gopnik/logger"
+	xservers "github.com/syth0le/gopnik/servers"
 )
 
 const (
@@ -12,28 +15,29 @@ const (
 
 func NewDefaultConfig() *Config {
 	return &Config{
-		Logger: LoggerConfig{
-			Level:       utils.InfoLevel,
+		Logger: xlogger.LoggerConfig{
+			Level:       xlogger.InfoLevel,
 			Encoding:    "console",
 			Path:        "stdout",
-			Environment: utils.Development,
+			Environment: xlogger.Development,
 		},
 		Application: ApplicationConfig{
 			GracefulShutdownTimeout: 15 * time.Second,
+			ForceShutdownTimeout:    20 * time.Second,
 			App:                     defaultAppName,
 			SaltValue:               defaultSaltValue,
 		},
-		PublicServer: ServerConfig{
+		PublicServer: xservers.ServerConfig{
 			Enable:   false,
 			Endpoint: "",
 			Port:     0,
 		},
-		AdminServer: ServerConfig{
+		AdminServer: xservers.ServerConfig{
 			Enable:   false,
 			Endpoint: "",
 			Port:     0,
 		},
-		Storage: StorageConfig{
+		Storage: xstorage.StorageConfig{
 			EnableMock:            false,
 			Hosts:                 []string{},
 			Port:                  0,

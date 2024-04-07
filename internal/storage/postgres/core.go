@@ -2,18 +2,20 @@ package postgres
 
 import (
 	"fmt"
+
 	"github.com/jmoiron/sqlx"
+	xstorage "github.com/syth0le/gopnik/db/postgres"
 	"go.uber.org/zap"
-	"social-network/cmd/social-network/configuration"
+
 	"social-network/internal/storage"
 )
 
 type Storage struct {
-	storage *PGStorage
+	storage *xstorage.PGStorage
 }
 
-func NewStorage(logger *zap.Logger, config configuration.StorageConfig) (*Storage, error) {
-	postgresStorage, err := NewPGStorage(logger, config)
+func NewStorage(logger *zap.Logger, config xstorage.StorageConfig) (*Storage, error) {
+	postgresStorage, err := xstorage.NewPGStorage(logger, config)
 	if err != nil {
 		return nil, fmt.Errorf("new pg storage: %w", err)
 	}

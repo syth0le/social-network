@@ -1,16 +1,18 @@
 package application
 
 import (
+	xservers "github.com/syth0le/gopnik/servers"
+
 	"social-network/internal/handler/publicapi"
 
 	"github.com/go-chi/chi/v5"
 )
 
-func (a *App) newHTTPServer(env *env) *HTTPServerWrapper {
-	return NewHTTPServerWrapper(
+func (a *App) newHTTPServer(env *env) *xservers.HTTPServerWrapper {
+	return xservers.NewHTTPServerWrapper(
 		a.Logger,
-		WithAdminServer(a.Config.AdminServer),
-		WithPublicServer(a.Config.PublicServer, a.publicMux(env)),
+		xservers.WithAdminServer(a.Config.AdminServer),
+		xservers.WithPublicServer(a.Config.PublicServer, a.publicMux(env)),
 	)
 }
 
