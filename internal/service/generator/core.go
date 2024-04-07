@@ -9,7 +9,7 @@ import (
 )
 
 type Service interface {
-	BatchGenerateUsers(ctx context.Context, params *BatchGenerateUsersParams) error
+	BatchGenerateUsers(ctx context.Context) error
 }
 
 type ServiceImpl struct {
