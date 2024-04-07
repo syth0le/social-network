@@ -22,4 +22,5 @@ go.work
 
 .idea
 social-network
+users-generator
 *.DS_Store
