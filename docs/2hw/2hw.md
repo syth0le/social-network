@@ -11,47 +11,47 @@
 ###  10 rps
 
 ##### latency до индекса
-![img.png](img.png)
+![img.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img.png)
 ##### throughput до индекса
-![img_1.png](img_1.png)
+![img_1.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_1.png)
 ##### http codes до индекса
-![img_2.png](img_2.png)
+![img_2.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_2.png)
 ##### latency после индекса
-![img_9.png](img_9.png)
+![img_9.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_9.png)
 ##### throughput после индекса
-![img_10.png](img_10.png)
+![img_10.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_10.png)
 ##### http codes после индекса
-![img_11.png](img_11.png)
+![img_11.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_11.png)
 
 ###  100 rps
 
 ##### latency до индекса
-![img_3.png](img_3.png)
+![img_3.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_3.png)
 ##### throughput до индекса
-![img_4.png](img_4.png)
+![img_4.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_4.png)
 ##### http codes до индекса
-![img_5.png](img_5.png)
+![img_5.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_5.png)
 ##### latency после индекса
-![img_12.png](img_12.png)
+![img_12.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_12.png)
 ##### throughput после индекса
-![img_13.png](img_13.png)
+![img_13.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_13.png)
 ##### http codes после индекса
-![img_14.png](img_14.png)
+![img_14.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_14.png)
 
 ###  1000 rps
 
 ##### latency до индекса
-![img_6.png](img_6.png)
+![img_6.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_6.png)
 ##### throughput до индекса
-![img_7.png](img_7.png)
+![img_7.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_7.png)
 ##### http codes до индекса
-![img_8.png](img_8.png)
+![img_8.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_8.png)
 ##### latency после индекса
-![img_15.png](img_15.png)
+![img_15.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_15.png)
 ##### throughput после индекса
-![img_16.png](img_16.png)
+![img_16.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_16.png)
 ##### http codes после индекса
-![img_17.png](img_17.png)
+![img_17.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_17.png)
 
 ###  10000 rps
 
@@ -59,11 +59,11 @@
 ##### А вот с индексом все работает замечательно. Добавление 1го доп пода приложения решит проблему небольшого фона пятисоток.
 
 ##### latency после индекса
-![img_18.png](img_18.png)
+![img_18.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_18.png)
 ##### throughput после индекса
-![img_19.png](img_19.png)
+![img_19.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_19.png)
 ##### http codes после индекса
-![img_20.png](img_20.png)
+![img_20.png](https://github.com/syth0le/social-network/blob/main/docs/2hw/img_20.png)
 
 
 ## По пунктам:
