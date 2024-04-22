@@ -9,6 +9,8 @@ import (
 
 	"social-network/cmd/social-network/configuration"
 	"social-network/internal/authentication"
+	"social-network/internal/clients"
+	"social-network/internal/service/post"
 	"social-network/internal/service/user"
 	"social-network/internal/storage/postgres"
 	"social-network/internal/token"
@@ -53,23 +55,42 @@ func (a *App) Run() error {
 type env struct {
 	userService           user.Service
 	authenticationService authentication.Service
+	postService           post.Service
 }
 
 func (a *App) constructEnv(ctx context.Context) (*env, error) {
-	db, err := postgres.NewStorage(a.Logger, a.Config.Storage)
+	postgresDB, err := postgres.NewStorage(a.Logger, a.Config.Storage)
 	if err != nil {
 		return nil, fmt.Errorf("new storage: %w", err)
 	}
-	a.Closer.Add(db.Close)
+	a.Closer.Add(postgresDB.Close)
 
-	tokenGenerator := token.NewGenerator(a.Config.Application)
+	//redisDB, err := redis.NewStorage(a.Logger, a.Config.Storage) // TODO: move to gopnik
+	redisClient := clients.NewRedisClient(a.Logger, a.Config.Redis)
+	//if err != nil {
+	//	return nil, fmt.Errorf("new redis client: %w", err)
+	//}
+	a.Closer.Add(redisClient.Close)
+
+	//redisDB, err := kafka.NewProducer(a.Logger, a.Config.Storage) // TODO: move to gopnik
+	//kafkaConsumer := clients.NewKafkaConsumer(a.Logger, a.Config.Redis)
+	//if err != nil {
+	//	return nil, fmt.Errorf("new redis client: %w", err)
+	//}
+	//a.Closer.Add(kafkaConsumer.Close)
+
+	tokenManager := token.NewManager(a.Config.Application)
 	userService := &user.ServiceImpl{
-		Storage:        db,
-		TokenGenerator: tokenGenerator,
+		Storage:      postgresDB,
+		TokenManager: tokenManager,
 	}
 
 	return &env{
-		userService:           userService,
-		authenticationService: authentication.Service{UserService: userService},
+		userService: userService,
+		authenticationService: authentication.Service{
+			UserService:  userService,
+			TokenManager: tokenManager,
+		},
+		postService: &post.ServiceImpl{Storage: postgresDB}, // TODO: add redis
 	}, nil
 }

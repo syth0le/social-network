@@ -53,6 +53,7 @@ func (s *Storage) CreateUser(ctx context.Context, params *model.UserRegister) (*
 	if err != nil {
 		return nil, xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
 	}
+
 	var entity userEntity
 	err = sqlx.GetContext(ctx, s.Master(), &entity, sql, args...)
 	if err != nil {
@@ -69,6 +70,31 @@ func (s *Storage) GetUserByID(ctx context.Context, id model.UserID) (*model.User
 		Where(sq.Eq{
 			fieldID:        id.String(),
 			fieldDeletedAt: nil,
+		}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
+	}
+
+	var entity userEntity
+	err = sqlx.GetContext(ctx, s.Slave(), &entity, sql, args...)
+	if err != nil {
+		return nil, xerrors.WrapSqlError(err)
+	}
+
+	return userEntityToModel(entity), nil
+}
+
+func (s *Storage) GetUserByTokenAndID(ctx context.Context, userID model.UserID, token string) (*model.User, error) {
+	sql, args, err := sq.Select(tableFields(UserTable, userFields)...).
+		From(UserTable).
+		Join(joinString(UserTable, fieldID, TokenTable, fieldUserID)).
+		Where(sq.Eq{
+			tableField(UserTable, fieldID):         userID,
+			tableField(TokenTable, fieldToken):     token,
+			tableField(TokenTable, fieldDeletedAt): nil,
+			tableField(UserTable, fieldDeletedAt):  nil,
 		}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()

@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS post_table;
+DROP TABLE IF EXISTS friend_table;

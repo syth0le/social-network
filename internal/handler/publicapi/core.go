@@ -12,12 +12,16 @@ import (
 
 	"github.com/go-http-utils/headers"
 
+	"social-network/internal/service/friend"
+	"social-network/internal/service/post"
 	"social-network/internal/service/user"
 )
 
 type Handler struct {
-	Logger      *zap.Logger
-	UserService user.Service
+	Logger        *zap.Logger
+	UserService   user.Service
+	PostService   post.Service
+	FriendService friend.Service
 }
 
 func (h *Handler) writeError(ctx context.Context, w http.ResponseWriter, err error) {
@@ -49,7 +53,7 @@ func writeResponse(w http.ResponseWriter, response any) {
 	}
 }
 
-func parseJSONRequest[T loginRequest | registerRequest](r *http.Request) (*T, error) {
+func parseJSONRequest[T loginRequest | registerRequest | createPostRequest | updatePostRequest](r *http.Request) (*T, error) {
 	defer r.Body.Close()
 	body, err := io.ReadAll(r.Body)
 	if err != nil {

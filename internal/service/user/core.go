@@ -17,12 +17,13 @@ type Service interface {
 	Login(ctx context.Context, params *LoginParams) (*model.Token, error)
 	Register(ctx context.Context, params *RegisterParams) (*model.Token, error)
 	GetUserByID(ctx context.Context, params *GetUserByIDParams) (*model.User, error)
+	GetUserByTokenAndID(ctx context.Context, params *GetUserByTokenAndIDParams) (*model.User, error)
 	SearchUser(ctx context.Context, params *SearchUserParams) ([]*model.User, error)
 }
 
 type ServiceImpl struct {
-	Storage        storage.Storage
-	TokenGenerator *token.Generator
+	Storage      storage.Storage
+	TokenManager *token.Manager
 }
 
 type LoginParams struct {
@@ -43,7 +44,7 @@ func (s *ServiceImpl) Login(ctx context.Context, params *LoginParams) (*model.To
 		return nil, xerrors.WrapNotFoundError(fmt.Errorf("not correct password: %w", err), "not correct credentials")
 	}
 
-	generatedToken, err := s.TokenGenerator.GenerateToken(user)
+	generatedToken, err := s.TokenManager.GenerateToken(user)
 	if err != nil {
 		return nil, fmt.Errorf("generate token: %w", err)
 	}
@@ -89,7 +90,7 @@ func (s *ServiceImpl) Register(ctx context.Context, params *RegisterParams) (*mo
 		return nil, fmt.Errorf("create user: %w", err)
 	}
 
-	generatedToken, err := s.TokenGenerator.GenerateToken(user)
+	generatedToken, err := s.TokenManager.GenerateToken(user)
 	if err != nil {
 		return nil, fmt.Errorf("generate token: %w", err)
 	}
@@ -110,6 +111,20 @@ func (s *ServiceImpl) GetUserByID(ctx context.Context, params *GetUserByIDParams
 	user, err := s.Storage.User().GetUserByID(ctx, params.UserID)
 	if err != nil {
 		return nil, fmt.Errorf("get user by id: %w", err)
+	}
+
+	return user, nil
+}
+
+type GetUserByTokenAndIDParams struct {
+	UserID model.UserID
+	Token  string
+}
+
+func (s *ServiceImpl) GetUserByTokenAndID(ctx context.Context, params *GetUserByTokenAndIDParams) (*model.User, error) {
+	user, err := s.Storage.User().GetUserByTokenAndID(ctx, params.UserID, params.Token)
+	if err != nil {
+		return nil, fmt.Errorf("get user by token and id: %w", err)
 	}
 
 	return user, nil

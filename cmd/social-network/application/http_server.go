@@ -22,16 +22,37 @@ func (a *App) publicMux(env *env) *chi.Mux {
 	handler := publicapi.Handler{
 		Logger:      a.Logger,
 		UserService: env.userService,
+		PostService: env.postService,
 	}
 
 	mux.Post("/login", handler.Login)
 	mux.Post("/user/register", handler.Register)
 	mux.Route("/user", func(r chi.Router) {
-		r.Use(env.authenticationService.AuthenticationInterceptor)
-
 		r.Get("/{userID}", handler.GetUserByID)
 
 		r.Get("/search", handler.SearchUser)
+	})
+
+	mux.Route("/friend", func(r chi.Router) {
+		r.Use(env.authenticationService.AuthenticationInterceptor)
+
+		r.Get("/{userID}", handler.ListFriends)
+		r.Get("/followers/{userID}", handler.ListFollowers)
+		r.Get("/subscriptions/{userID}", handler.ListSubscriptions)
+
+		r.Put("/set/{userID}", handler.SetFriend)
+		r.Put("/delete/{userID}", handler.DeleteFriend)
+	})
+
+	mux.Route("/post", func(r chi.Router) {
+		r.Use(env.authenticationService.AuthenticationInterceptor)
+
+		r.Post("/", handler.CreatePost)
+		r.Get("/{postID}", handler.GetPostByID)
+		r.Patch("/{postID}", handler.UpdatePost)
+		r.Delete("/{postID}", handler.DeletePost)
+
+		r.Get("/feed", handler.GetFeed)
 	})
 
 	return mux

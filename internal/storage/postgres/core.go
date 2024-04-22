@@ -32,6 +32,14 @@ func (s *Storage) Token() storage.TokenRepository {
 	return s
 }
 
+func (s *Storage) Friend() storage.FriendRepository {
+	return s
+}
+
+func (s *Storage) Post() storage.PostRepository {
+	return s
+}
+
 func (s *Storage) Close() error {
 	return s.storage.Close()
 }

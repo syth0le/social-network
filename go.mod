@@ -10,6 +10,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jmoiron/sqlx v1.3.5
+	github.com/redis/go-redis/v9 v9.5.1
 	github.com/spf13/pflag v1.0.5
 	github.com/syth0le/gopnik v0.0.0-20240308124803-26754de10123
 	go.uber.org/zap v1.27.0
@@ -17,6 +18,8 @@ require (
 )
 
 require (
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect

@@ -1,12 +1,25 @@
 package utils
 
 import (
-	"github.com/google/uuid"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
-const serviceNamePrefix = "snw"
+const (
+	serviceNamePrefix = "snw"
+	userEntityPrefix  = "u"
+	postEntityPrefix  = "p"
+)
 
 func GenerateUUID() string {
-	return serviceNamePrefix + strings.Replace(uuid.New().String(), "-", "", -1)
+	return generateUID(userEntityPrefix)
+}
+
+func generateUID(entityPrefix string) string {
+	return serviceNamePrefix + entityPrefix + strings.Replace(uuid.New().String(), "-", "", -1)
+}
+
+func GeneratePUID() string {
+	return generateUID(postEntityPrefix)
 }
