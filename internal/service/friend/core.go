@@ -12,7 +12,10 @@ type Service interface {
 	ListFriends(ctx context.Context, params *ListFriendsParams) ([]*model.Friend, error)             // TODO: pagination
 	ListFollowers(ctx context.Context, params *ListFollowersParams) ([]*model.Friend, error)         // TODO: pagination
 	ListSubscriptions(ctx context.Context, params *ListSubscriptionsParams) ([]*model.Friend, error) // TODO: pagination
-	SetFriend(ctx context.Context, params *SetFriendParams) error
+	SetFriendRequest(ctx context.Context, params *SetFriendRequestParams) error
+	ConfirmFriendRequest(ctx context.Context, params *ConfirmFriendRequestParams) error
+	DeclineFriendRequest(ctx context.Context, params *DeclineFriendRequestParams) error
+	RevokeFriendRequest(ctx context.Context, params *RevokeFriendRequestParams) error
 	DeleteFriend(ctx context.Context, params *DeleteFriendParams) error
 }
 
@@ -59,15 +62,57 @@ func (s ServiceImpl) ListSubscriptions(ctx context.Context, params *ListSubscrip
 	return subscriptions, nil
 }
 
-type SetFriendParams struct {
-	AuthorID   model.UserID
-	FollowerID model.UserID
+type SetFriendRequestParams struct {
+	AuthorID    model.UserID
+	RecipientID model.UserID
 }
 
-func (s ServiceImpl) SetFriend(ctx context.Context, params *SetFriendParams) error {
-	err := s.Storage.Friend().SetFriend(ctx, params.AuthorID, params.FollowerID)
+func (s ServiceImpl) SetFriendRequest(ctx context.Context, params *SetFriendRequestParams) error {
+	err := s.Storage.Friend().SetFriendRequest(ctx, params.AuthorID, params.RecipientID)
 	if err != nil {
 		return fmt.Errorf("set friend: %w", err)
+	}
+
+	return nil
+}
+
+type ConfirmFriendRequestParams struct {
+	AuthorID    model.UserID
+	RecipientID model.UserID
+}
+
+func (s ServiceImpl) ConfirmFriendRequest(ctx context.Context, params *ConfirmFriendRequestParams) error {
+	err := s.Storage.Friend().ConfirmFriendRequest(ctx, params.AuthorID, params.RecipientID)
+	if err != nil {
+		return fmt.Errorf("confirm friend request: %w", err)
+	}
+
+	return nil
+}
+
+type DeclineFriendRequestParams struct {
+	AuthorID    model.UserID
+	RecipientID model.UserID
+}
+
+func (s ServiceImpl) DeclineFriendRequest(ctx context.Context, params *DeclineFriendRequestParams) error {
+	err := s.Storage.Friend().DeclineFriendRequest(ctx, params.AuthorID, params.RecipientID)
+	if err != nil {
+		return fmt.Errorf("decline friend request: %w", err)
+	}
+
+	return nil
+}
+
+type RevokeFriendRequestParams struct {
+	AuthorID    model.UserID
+	RecipientID model.UserID
+}
+
+func (s ServiceImpl) RevokeFriendRequest(ctx context.Context, params *RevokeFriendRequestParams) error {
+	err := s.Storage.Friend().RevokeFriendRequest(ctx, params.AuthorID, params.RecipientID)
+	if err != nil {
+		return fmt.Errorf("revoke friend request: %w", err)
 	}
 
 	return nil

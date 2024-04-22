@@ -47,49 +47,4 @@ CREATE TABLE IF NOT EXISTS friend_table
     CONSTRAINT pk_token_table PRIMARY KEY (id),
     CONSTRAINT fk_token_table_user_table_first_user FOREIGN KEY (first_user_id) REFERENCES user_table (id),
     CONSTRAINT fk_token_table_user_table_second_user FOREIGN KEY (second_user_id) REFERENCES user_table (id)
-
-    -- TODO: set unique constraint(first_user_id, second_user_id)
 );
-
--- get friends
--- SELECT * FROM friend_table WHERE (first_user_id = ID OR second_user_id = ID) AND is_friend=true;
-SELECT
---     CASE
---         WHEN f.first_user_id = ID THEN f.second_user_id
---         ELSE f.first_user_id
---     END friend_id,
-u.id,
-u.username,
-u.first_name,
-u.second_name
-FROM friend_table AS f
-         JOIN user_table AS u ON
-    CASE
-        WHEN f.first_user_id = ID THEN f.first_user_id = u.id
-        ELSE f.second_user_id = u.id
-        END
-WHERE (f.first_user_id = ID OR f.second_user_id = ID)
-  AND f.is_friend = true;
-
-
--- get followers
-SELECT *
-FROM friend_table AS f
-         JOIN user_table AS u ON f.first_user_id = u.id
-WHERE f.first_user_id = ID
-  AND f.is_friend = false;
-
--- get followed
-SELECT *
-FROM friend_table AS f
-         JOIN user_table AS u ON f.second_user_id = u.id
-WHERE f.second_user_id = ID
-  AND f.is_friend = false;
-
--- set friend
-INSERT INTO friend_table
-WHERE first_user_id = ID and is_friend= false;
-
--- set friend
-INSERT INTO friend_table
-WHERE first_user_id = ID and is_friend= false;

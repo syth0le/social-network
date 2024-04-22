@@ -97,7 +97,7 @@ func (h *Handler) ListSubscriptions(w http.ResponseWriter, r *http.Request) {
 	writeResponse(w, resp)
 }
 
-func (h *Handler) SetFriend(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) SetFriendRequest(w http.ResponseWriter, r *http.Request) {
 	handleRequest := func() error {
 		ctx := r.Context()
 
@@ -108,12 +108,12 @@ func (h *Handler) SetFriend(w http.ResponseWriter, r *http.Request) {
 
 		authorID := chi.URLParamFromCtx(ctx, "userID")
 
-		err := h.FriendService.SetFriend(ctx, &friend.SetFriendParams{
-			AuthorID:   model.UserID(userIDStr.(string)),
-			FollowerID: model.UserID(authorID),
+		err := h.FriendService.SetFriendRequest(ctx, &friend.SetFriendRequestParams{
+			AuthorID:    model.UserID(userIDStr.(string)),
+			RecipientID: model.UserID(authorID),
 		})
 		if err != nil {
-			return fmt.Errorf("set friend: %w", err)
+			return fmt.Errorf("set friend request: %w", err)
 		}
 
 		return nil
@@ -121,7 +121,97 @@ func (h *Handler) SetFriend(w http.ResponseWriter, r *http.Request) {
 
 	err := handleRequest()
 	if err != nil {
-		h.writeError(r.Context(), w, fmt.Errorf("set friend: %w", err))
+		h.writeError(r.Context(), w, fmt.Errorf("set friend request: %w", err))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) ConfirmFriendRequest(w http.ResponseWriter, r *http.Request) {
+	handleRequest := func() error {
+		ctx := r.Context()
+
+		userIDStr := ctx.Value(authentication.UserIDValue)
+		if userIDStr == "" {
+			return fmt.Errorf("cannot recognize userID")
+		}
+
+		authorID := chi.URLParamFromCtx(ctx, "userID")
+
+		err := h.FriendService.ConfirmFriendRequest(ctx, &friend.ConfirmFriendRequestParams{
+			AuthorID:    model.UserID(userIDStr.(string)),
+			RecipientID: model.UserID(authorID),
+		})
+		if err != nil {
+			return fmt.Errorf("confirm friend request: %w", err)
+		}
+
+		return nil
+	}
+
+	err := handleRequest()
+	if err != nil {
+		h.writeError(r.Context(), w, fmt.Errorf("confirm friend request: %w", err))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) DeclineFriendRequest(w http.ResponseWriter, r *http.Request) {
+	handleRequest := func() error {
+		ctx := r.Context()
+
+		userIDStr := ctx.Value(authentication.UserIDValue)
+		if userIDStr == "" {
+			return fmt.Errorf("cannot recognize userID")
+		}
+
+		authorID := chi.URLParamFromCtx(ctx, "userID")
+
+		err := h.FriendService.DeclineFriendRequest(ctx, &friend.DeclineFriendRequestParams{
+			AuthorID:    model.UserID(userIDStr.(string)),
+			RecipientID: model.UserID(authorID),
+		})
+		if err != nil {
+			return fmt.Errorf("decline friend request: %w", err)
+		}
+
+		return nil
+	}
+
+	err := handleRequest()
+	if err != nil {
+		h.writeError(r.Context(), w, fmt.Errorf("decline friend request: %w", err))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) RevokeFriendRequest(w http.ResponseWriter, r *http.Request) {
+	handleRequest := func() error {
+		ctx := r.Context()
+
+		userIDStr := ctx.Value(authentication.UserIDValue)
+		if userIDStr == "" {
+			return fmt.Errorf("cannot recognize userID")
+		}
+
+		authorID := chi.URLParamFromCtx(ctx, "userID")
+
+		err := h.FriendService.RevokeFriendRequest(ctx, &friend.RevokeFriendRequestParams{
+			AuthorID:    model.UserID(userIDStr.(string)),
+			RecipientID: model.UserID(authorID),
+		})
+		if err != nil {
+			return fmt.Errorf("revoke friend request: %w", err)
+		}
+
+		return nil
+	}
+
+	err := handleRequest()
+	if err != nil {
+		h.writeError(r.Context(), w, fmt.Errorf("revoke friend request: %w", err))
 		return
 	}
 	w.WriteHeader(http.StatusOK)

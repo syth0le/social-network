@@ -40,7 +40,10 @@ func (a *App) publicMux(env *env) *chi.Mux {
 		r.Get("/followers/{userID}", handler.ListFollowers)
 		r.Get("/subscriptions/{userID}", handler.ListSubscriptions)
 
-		r.Put("/set/{userID}", handler.SetFriend)
+		r.Put("/set/{userID}", handler.SetFriendRequest)
+		r.Put("/confirm/{userID}", handler.ConfirmFriendRequest)
+		r.Put("/decline/{userID}", handler.DeclineFriendRequest)
+		r.Put("/revoke/{userID}", handler.RevokeFriendRequest)
 		r.Put("/delete/{userID}", handler.DeleteFriend)
 	})
 
