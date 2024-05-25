@@ -30,7 +30,7 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		}
 
 		err = h.PostService.Create(ctx, &post.CreatePostParams{
-			UserID: model.UserID(userIDStr.(string)),
+			UserID: userIDStr.(model.UserID),
 			Text:   request.Text,
 		})
 		if err != nil {
@@ -148,10 +148,10 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 		}
 
 		posts, err := h.PostService.GetFeed(ctx, &post.GetFeedParams{
-			FollowerID: model.UserID(userIDStr.(string)),
+			FollowerID: userIDStr.(model.UserID),
 		})
 		if err != nil {
-			return nil, fmt.Errorf("post create: %w", err)
+			return nil, fmt.Errorf("get feed: %w", err)
 		}
 
 		return postModelsToResponse(posts), nil

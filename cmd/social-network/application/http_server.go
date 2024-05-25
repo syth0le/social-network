@@ -45,7 +45,7 @@ func (a *App) publicMux(env *env) *chi.Mux {
 	mux.Route("/post", func(r chi.Router) {
 		r.Use(env.authenticationService.AuthenticationInterceptor)
 
-		r.Post("/", handler.CreatePost)
+		r.Post("/", handler.CreatePost) // TODO: возвращать айдишник поста хотя бы
 		r.Get("/{postID}", handler.GetPostByID)
 		r.Patch("/{postID}", handler.UpdatePost)
 		r.Delete("/{postID}", handler.DeletePost)

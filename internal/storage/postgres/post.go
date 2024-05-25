@@ -40,7 +40,7 @@ func (s *Storage) Create(ctx context.Context, params *model.CreatePostParams) er
 func (s *Storage) Get(ctx context.Context, postID model.PostID) (*model.Post, error) {
 	sql, args, err := sq.Select(
 		mergeFields(tableFields(PostTable, postFields), tableField(UserTable, fieldUsername))...,
-	).
+	).From(PostTable).
 		Join(joinString(PostTable, fieldUserID, UserTable, fieldID)).
 		Where(sq.Eq{
 			tableField(PostTable, fieldID):        postID,
@@ -111,10 +111,10 @@ func (s *Storage) Delete(ctx context.Context, postID model.PostID) error {
 func (s *Storage) GetFeed(ctx context.Context, userID model.UserID) ([]*model.Post, error) {
 	sql, args, err := sq.Select(
 		mergeFields(tableFields(PostTable, postFields), tableField(UserTable, fieldUsername))...,
-	).
+	).From(PostTable).
 		Columns(postFields...).
 		Join(joinString(PostTable, fieldUserID, UserTable, fieldID)).
-		Join(joinString(PostTable, fieldUserID, FriendTable, fieldUserID)). // TODO: join case
+		Join(joinString(PostTable, fieldUserID, FriendTable, fieldFirstUserID)). // TODO: join case
 		Where(sq.Eq{
 			tableField(PostTable, fieldDeletedAt):      nil,
 			tableField(FriendTable, fieldSecondUserID): userID,
@@ -135,10 +135,12 @@ func (s *Storage) GetFeed(ctx context.Context, userID model.UserID) ([]*model.Po
 }
 
 type postEntity struct {
-	ID       string `db:"id"`
-	Text     string `db:"text"`
-	Author   string `db:"username"`
-	AuthorID string `db:"user_id"`
+	ID        string `db:"id"`
+	Text      string `db:"text"`
+	Author    string `db:"username"`
+	AuthorID  string `db:"user_id"`
+	CreatedAt string `db:"created_at"`
+	UpdatedAt string `db:"updated_at"`
 }
 
 func postEntityToModel(entity postEntity) *model.Post {
