@@ -45,7 +45,7 @@ func (m *Manager) GenerateToken(user *model.User) (*model.Token, error) {
 	}
 
 	return &model.Token{
-		TokenID:        model.TokenID(utils.GenerateUUID()),
+		TokenID:        model.TokenID(utils.GenerateTUID()),
 		UserID:         user.UserID,
 		Token:          tokenString,
 		ExpirationDate: expirationDate,

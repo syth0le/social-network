@@ -9,12 +9,17 @@ import (
 const (
 	serviceNamePrefix  = "snw"
 	userEntityPrefix   = "u"
+	tokenEntityPrefix  = "t"
 	postEntityPrefix   = "p"
 	friendEntityPrefix = "f"
 )
 
 func GenerateUUID() string {
 	return generateUID(userEntityPrefix)
+}
+
+func GenerateTUID() string {
+	return generateUID(tokenEntityPrefix)
 }
 
 func generateUID(entityPrefix string) string {

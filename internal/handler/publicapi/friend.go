@@ -57,9 +57,9 @@ func (h *Handler) SetFriendRequest(w http.ResponseWriter, r *http.Request) {
 		}
 
 		authorID := chi.URLParamFromCtx(ctx, "userID")
-
+		fmt.Println(userIDStr)
 		err := h.FriendService.AddFriend(ctx, &friend.AddFriendParams{
-			AuthorID:   model.UserID(userIDStr.(string)),
+			AuthorID:   userIDStr.(model.UserID),
 			FollowerID: model.UserID(authorID),
 		})
 		if err != nil {
@@ -89,7 +89,7 @@ func (h *Handler) DeleteFriend(w http.ResponseWriter, r *http.Request) {
 		authorID := chi.URLParamFromCtx(ctx, "userID")
 
 		err := h.FriendService.DeleteFriend(ctx, &friend.DeleteFriendParams{
-			AuthorID:   model.UserID(userIDStr.(string)),
+			AuthorID:   userIDStr.(model.UserID),
 			FollowerID: model.UserID(authorID),
 		})
 		if err != nil {

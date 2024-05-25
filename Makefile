@@ -10,13 +10,13 @@ make-migration:
 
 # migrate tool
 migrate-master:
-	pgmigrate migrate -vvv -c "host=localhost port=6432 dbname=social-network-local user=social-network-local-admin password=eepha[l3eaph8Xo target_session_attrs=read-write sslmode=disable" -t latest
+	migrate -path ./migrations -database "postgresql://social-network-local-admin:eephayl3eaph8Xo@localhost:6432/social-network-local?sslmode=disable" -verbose up
 
 migrate-slave:
-	pgmigrate migrate -vvv -c "host=localhost port=7432 dbname=postgres user=postgres password=postgres target_session_attrs=read-write sslmode=disable" -t latest
+	migrate -path ./migrations -database "postgresql://social-network-local-admin:eephayl3eaph8Xo@localhost:7432/social-network-local?sslmode=disable" -verbose up
 
 migrate:
-	migrate-master & migrate-slave
+	make migrate-master & make migrate-slave
 
 # pgmigrate tool
 migrate-master-pgmigrate:

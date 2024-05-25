@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS post_table
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
     deleted_at TIMESTAMP WITH TIME ZONE,
 
-    CONSTRAINT pk_token_table PRIMARY KEY (id),
-    CONSTRAINT fk_token_table_user_table FOREIGN KEY (user_id) REFERENCES user_table (id)
+    CONSTRAINT pk_post_table PRIMARY KEY (id),
+    CONSTRAINT fk_post_table_user_table FOREIGN KEY (user_id) REFERENCES user_table (id)
 );
 
 CREATE TABLE IF NOT EXISTS friend_table
@@ -41,9 +41,9 @@ CREATE TABLE IF NOT EXISTS friend_table
 
 
     created_at     TIMESTAMP WITH TIME ZONE NOT NULL,
-    deleted_at     TIMESTAMP WITH TIME ZONE NOT NULL,
+    deleted_at     TIMESTAMP WITH TIME ZONE,
 
-    CONSTRAINT pk_token_table PRIMARY KEY (id),
-    CONSTRAINT fk_token_table_user_table_first_user FOREIGN KEY (first_user_id) REFERENCES user_table (id),
-    CONSTRAINT fk_token_table_user_table_second_user FOREIGN KEY (second_user_id) REFERENCES user_table (id)
+    CONSTRAINT pk_friend_table PRIMARY KEY (id),
+    CONSTRAINT fk_friend_table_user_table_first_user FOREIGN KEY (first_user_id) REFERENCES user_table (id),
+    CONSTRAINT fk_friend_table_user_table_second_user FOREIGN KEY (second_user_id) REFERENCES user_table (id)
 );

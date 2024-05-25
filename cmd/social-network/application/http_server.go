@@ -20,9 +20,10 @@ func (a *App) publicMux(env *env) *chi.Mux {
 	mux := chi.NewMux()
 
 	handler := publicapi.Handler{
-		Logger:      a.Logger,
-		UserService: env.userService,
-		PostService: env.postService,
+		Logger:        a.Logger,
+		UserService:   env.userService,
+		PostService:   env.postService,
+		FriendService: env.friendService,
 	}
 
 	mux.Post("/login", handler.Login)

@@ -18,13 +18,14 @@ func (s *Storage) GetFriend(ctx context.Context, authorID, followerID model.User
 		tableField(UserTable, fieldUsername),
 		tableField(UserTable, fieldFirstName),
 		tableField(UserTable, fieldSecondName),
-	).
+	).From(FriendTable).
 		Join(
 			joinString(FriendTable, fieldSecondUserID, UserTable, fieldID),
 		).
 		Where(sq.Eq{
 			tableField(FriendTable, fieldFirstUserID):  authorID,
 			tableField(FriendTable, fieldSecondUserID): followerID,
+			tableField(FriendTable, fieldDeletedAt):    nil,
 		}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
@@ -47,11 +48,14 @@ func (s *Storage) ListFriends(ctx context.Context, userID model.UserID) ([]*mode
 		tableField(UserTable, fieldUsername),
 		tableField(UserTable, fieldFirstName),
 		tableField(UserTable, fieldSecondName),
-	).
+	).From(FriendTable).
 		Join(
 			joinString(FriendTable, fieldSecondUserID, UserTable, fieldID),
 		).
-		Where(sq.Eq{tableField(FriendTable, fieldFirstUserID): userID}).
+		Where(sq.Eq{
+			tableField(FriendTable, fieldFirstUserID): userID,
+			tableField(FriendTable, fieldDeletedAt):   nil,
+		}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {

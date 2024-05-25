@@ -9,7 +9,7 @@ import (
 
 	"social-network/cmd/social-network/configuration"
 	"social-network/internal/authentication"
-	"social-network/internal/clients"
+	"social-network/internal/service/friend"
 	"social-network/internal/service/post"
 	"social-network/internal/service/user"
 	"social-network/internal/storage/postgres"
@@ -56,6 +56,7 @@ type env struct {
 	userService           user.Service
 	authenticationService authentication.Service
 	postService           post.Service
+	friendService         friend.Service
 }
 
 func (a *App) constructEnv(ctx context.Context) (*env, error) {
@@ -65,19 +66,19 @@ func (a *App) constructEnv(ctx context.Context) (*env, error) {
 	}
 	a.Closer.Add(postgresDB.Close)
 
-	//redisDB, err := redis.NewStorage(a.Logger, a.Config.Storage) // TODO: move to gopnik
-	redisClient := clients.NewRedisClient(a.Logger, a.Config.Redis)
-	//if err != nil {
+	// redisDB, err := redis.NewStorage(a.Logger, a.Config.Storage) // TODO: move to gopnik
+	// redisClient := clients.NewRedisClient(a.Logger, a.Config.Redis)
+	// if err != nil {
 	//	return nil, fmt.Errorf("new redis client: %w", err)
-	//}
-	a.Closer.Add(redisClient.Close)
+	// }
+	// a.Closer.Add(redisClient.Close)
 
-	//redisDB, err := kafka.NewProducer(a.Logger, a.Config.Storage) // TODO: move to gopnik
-	//kafkaConsumer := clients.NewKafkaConsumer(a.Logger, a.Config.Redis)
-	//if err != nil {
+	// redisDB, err := kafka.NewProducer(a.Logger, a.Config.Storage) // TODO: move to gopnik
+	// kafkaConsumer := clients.NewKafkaConsumer(a.Logger, a.Config.Redis)
+	// if err != nil {
 	//	return nil, fmt.Errorf("new redis client: %w", err)
-	//}
-	//a.Closer.Add(kafkaConsumer.Close)
+	// }
+	// a.Closer.Add(kafkaConsumer.Close)
 
 	tokenManager := token.NewManager(a.Config.Application)
 	userService := &user.ServiceImpl{
@@ -90,7 +91,9 @@ func (a *App) constructEnv(ctx context.Context) (*env, error) {
 		authenticationService: authentication.Service{
 			UserService:  userService,
 			TokenManager: tokenManager,
+			Logger:       a.Logger,
 		},
-		postService: &post.ServiceImpl{Storage: postgresDB}, // TODO: add redis
+		postService:   &post.ServiceImpl{Storage: postgresDB}, // TODO: add redis
+		friendService: &friend.ServiceImpl{Storage: postgresDB},
 	}, nil
 }
