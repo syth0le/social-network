@@ -32,7 +32,7 @@ func (s *Storage) ListFriends(ctx context.Context, userID model.UserID) ([]*mode
 		Join(
 			sq.Case().When(
 				sq.Eq{tableField(FriendTable, fieldFirstUserID): userID},
-				joinString(FriendTable, fieldFirstUserID, UserTable, fieldID),
+				joinString(FriendTable, fieldFirstUserID, UserTable, fieldID), // TODO join case
 			).Else(joinString(FriendTable, fieldSecondUserID, UserTable, fieldID)),
 		).
 		Where(sq.And{

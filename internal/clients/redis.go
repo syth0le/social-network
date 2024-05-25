@@ -4,7 +4,7 @@ import "github.com/redis/go-redis/v9"
 
 type RedisClient struct {
 	*redis.Client
-	endpoints
+	// endpoints
 }
 
 func NewRedisClient(endpoints []string) *RedisClient {

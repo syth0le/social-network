@@ -33,7 +33,7 @@ type ServiceImpl struct {
 }
 
 func (s *ServiceImpl) BatchGenerateUsers(ctx context.Context) error {
-	//TODO: make atomic transaction
+	// TODO: make atomic transaction
 	usersList := s.readData()
 	var usersListForBatchCreate []*model.UserRegister
 	counter := 0

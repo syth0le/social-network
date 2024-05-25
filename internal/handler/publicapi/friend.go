@@ -261,6 +261,7 @@ func friendModelsToResponse(friendModels []*model.Friend) *friendListResponse {
 	for _, userModel := range friendModels {
 		users = append(users, friendModelToResponse(userModel))
 	}
+
 	return &friendListResponse{
 		Users: users,
 	}
