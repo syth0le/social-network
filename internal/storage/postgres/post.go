@@ -112,7 +112,6 @@ func (s *Storage) GetFeed(ctx context.Context, userID model.UserID) ([]*model.Po
 	sql, args, err := sq.Select(
 		mergeFields(tableFields(PostTable, postFields), tableField(UserTable, fieldUsername))...,
 	).From(PostTable).
-		Columns(postFields...).
 		Join(joinString(PostTable, fieldUserID, UserTable, fieldID)).
 		Join(joinString(PostTable, fieldUserID, FriendTable, fieldFirstUserID)). // TODO: join case
 		Where(sq.Eq{
@@ -121,6 +120,7 @@ func (s *Storage) GetFeed(ctx context.Context, userID model.UserID) ([]*model.Po
 		}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
+	fmt.Println("SQL:", sql)
 	if err != nil {
 		return nil, xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
 	}
