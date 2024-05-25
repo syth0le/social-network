@@ -7,9 +7,10 @@ import (
 )
 
 const (
-	serviceNamePrefix = "snw"
-	userEntityPrefix  = "u"
-	postEntityPrefix  = "p"
+	serviceNamePrefix  = "snw"
+	userEntityPrefix   = "u"
+	postEntityPrefix   = "p"
+	friendEntityPrefix = "f"
 )
 
 func GenerateUUID() string {
@@ -22,4 +23,8 @@ func generateUID(entityPrefix string) string {
 
 func GeneratePUID() string {
 	return generateUID(postEntityPrefix)
+}
+
+func GenerateFUID() string {
+	return generateUID(friendEntityPrefix)
 }

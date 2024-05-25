@@ -12,15 +12,34 @@ import (
 	"social-network/internal/model"
 )
 
-//SELECT
-//u.id, u.username, u.first_name, u.second_name
-//FROM friend_table AS f
-//JOIN user_table AS u ON
-//CASE
-//WHEN f.first_user_id = ID THEN f.first_user_id = u.id
-//ELSE f.second_user_id = u.id
-//END
-//WHERE (f.first_user_id = ID OR f.second_user_id = ID) AND f.is_friend=true;
+func (s *Storage) GetFriend(ctx context.Context, authorID, followerID model.UserID) (*model.Friend, error) {
+	sql, args, err := sq.Select(
+		tableField(UserTable, fieldID),
+		tableField(UserTable, fieldUsername),
+		tableField(UserTable, fieldFirstName),
+		tableField(UserTable, fieldSecondName),
+	).
+		Join(
+			joinString(FriendTable, fieldSecondUserID, UserTable, fieldID),
+		).
+		Where(sq.Eq{
+			tableField(FriendTable, fieldFirstUserID):  authorID,
+			tableField(FriendTable, fieldSecondUserID): followerID,
+		}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
+	}
+
+	var entity friendEntity
+	err = sqlx.GetContext(ctx, s.Slave(), &entity, sql, args...)
+	if err != nil {
+		return nil, xerrors.WrapSqlError(err)
+	}
+
+	return friendEntityToModel(entity), nil
+}
 
 func (s *Storage) ListFriends(ctx context.Context, userID model.UserID) ([]*model.Friend, error) {
 	sql, args, err := sq.Select(
@@ -30,18 +49,9 @@ func (s *Storage) ListFriends(ctx context.Context, userID model.UserID) ([]*mode
 		tableField(UserTable, fieldSecondName),
 	).
 		Join(
-			sq.Case().When(
-				sq.Eq{tableField(FriendTable, fieldFirstUserID): userID},
-				joinString(FriendTable, fieldFirstUserID, UserTable, fieldID), // TODO join case
-			).Else(joinString(FriendTable, fieldSecondUserID, UserTable, fieldID)),
+			joinString(FriendTable, fieldSecondUserID, UserTable, fieldID),
 		).
-		Where(sq.And{
-			sq.Or{
-				sq.Eq{tableField(FriendTable, fieldFirstUserID): userID},
-				sq.Eq{tableField(FriendTable, fieldSecondUserID): userID},
-			},
-			sq.Eq{tableField(FriendTable, fieldStatus): fieldStatusAccepted},
-		}).
+		Where(sq.Eq{tableField(FriendTable, fieldFirstUserID): userID}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
@@ -57,166 +67,18 @@ func (s *Storage) ListFriends(ctx context.Context, userID model.UserID) ([]*mode
 	return friendEntitiesToModels(entities), nil
 }
 
-// ListFollowers -- get followers
-// SELECT * FROM friend_table AS f
-// JOIN user_table AS u ON f.first_user_id = u.id
-// WHERE f.first_user_id = ID AND f.is_friend=false;
-func (s *Storage) ListFollowers(ctx context.Context, userID model.UserID) ([]*model.Friend, error) {
-	sql, args, err := sq.Select(
-		tableField(UserTable, fieldID),
-		tableField(UserTable, fieldUsername),
-		tableField(UserTable, fieldFirstName),
-		tableField(UserTable, fieldSecondName),
-	).
-		Join(joinString(FriendTable, fieldFirstUserID, UserTable, fieldID)). // TODO неверный Join()
-		Where(
-			sq.Or{
-				sq.Eq{
-					tableField(FriendTable, fieldSecondUserID): userID,
-					tableField(FriendTable, fieldStatus):       []string{fieldStatusExpected, fieldStatusDeclined},
-				},
-				sq.Eq{
-					tableField(FriendTable, fieldFirstUserID): userID,
-					tableField(FriendTable, fieldStatus):      fieldStatusRevoked,
-				},
-			},
-		).
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
+func (s *Storage) AddFriend(ctx context.Context, params *model.AddFriendParams) error {
+	err := params.Validate()
 	if err != nil {
-		return nil, xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
+		return fmt.Errorf("params validate: %w", err)
 	}
 
-	var entities []friendEntity
-	err = sqlx.SelectContext(ctx, s.Slave(), &entities, sql, args...)
-	if err != nil {
-		return nil, xerrors.WrapSqlError(err)
-	}
-
-	return friendEntitiesToModels(entities), nil
-}
-
-// ListSubscriptions -- get followed
-// SELECT * FROM friend_table AS f
-// JOIN user_table AS u ON f.second_user_id = u.id
-// WHERE f.second_user_id = ID AND f.is_friend=false;
-func (s *Storage) ListSubscriptions(ctx context.Context, userID model.UserID) ([]*model.Friend, error) {
-	sql, args, err := sq.Select(
-		tableField(UserTable, fieldID),
-		tableField(UserTable, fieldUsername),
-		tableField(UserTable, fieldFirstName),
-		tableField(UserTable, fieldSecondName),
-	).
-		Join(joinString(FriendTable, fieldSecondUserID, UserTable, fieldID)). // TODO неверный Join()
-		Where(
-			sq.Or{
-				sq.Eq{
-					tableField(FriendTable, fieldFirstUserID): userID,
-					tableField(FriendTable, fieldStatus):      []string{fieldStatusExpected, fieldStatusDeclined},
-				},
-				sq.Eq{
-					tableField(FriendTable, fieldSecondUserID): userID,
-					tableField(FriendTable, fieldStatus):       fieldStatusRevoked,
-				},
-			},
-		).
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
-	if err != nil {
-		return nil, xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
-	}
-
-	var entities []friendEntity
-	err = sqlx.SelectContext(ctx, s.Slave(), &entities, sql, args...)
-	if err != nil {
-		return nil, xerrors.WrapSqlError(err)
-	}
-
-	return friendEntitiesToModels(entities), nil
-}
-
-func (s *Storage) SetFriendRequest(ctx context.Context, authorID, recipientID model.UserID) error {
 	now := time.Now().Truncate(time.Millisecond)
 
-	sql, args, err := sq.Update(FriendTable).
-		Set(fieldDeletedAt, now).
-		Where(sq.Eq{
-			fieldFirstUserID:  authorID,
-			fieldSecondUserID: recipientID,
-			fieldDeletedAt:    nil,
-		}).
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
-	if err != nil {
-		return xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
-	}
-
-	_, err = s.Master().ExecContext(ctx, sql, args...)
-	if err != nil {
-		return xerrors.WrapSqlError(err)
-	}
-
-	return nil
-}
-
-func (s *Storage) ConfirmFriendRequest(ctx context.Context, authorID, recipientID model.UserID) error {
-	now := time.Now().Truncate(time.Millisecond)
-
-	sql, args, err := sq.Update(FriendTable).
-		Set(fieldDeletedAt, now).
-		Where(sq.Eq{
-			fieldFirstUserID:  authorID,
-			fieldSecondUserID: recipientID,
-			fieldDeletedAt:    nil,
-		}).
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
-	if err != nil {
-		return xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
-	}
-
-	_, err = s.Master().ExecContext(ctx, sql, args...)
-	if err != nil {
-		return xerrors.WrapSqlError(err)
-	}
-
-	return nil
-}
-
-func (s *Storage) DeclineFriendRequest(ctx context.Context, authorID, recipientID model.UserID) error {
-	now := time.Now().Truncate(time.Millisecond)
-
-	sql, args, err := sq.Update(FriendTable).
-		Set(fieldDeletedAt, now).
-		Where(sq.Eq{
-			fieldFirstUserID:  authorID,
-			fieldSecondUserID: recipientID,
-			fieldDeletedAt:    nil,
-		}).
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
-	if err != nil {
-		return xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
-	}
-
-	_, err = s.Master().ExecContext(ctx, sql, args...)
-	if err != nil {
-		return xerrors.WrapSqlError(err)
-	}
-
-	return nil
-}
-
-func (s *Storage) RevokeFriendRequest(ctx context.Context, authorID, recipientID model.UserID) error {
-	now := time.Now().Truncate(time.Millisecond)
-
-	sql, args, err := sq.Update(FriendTable).
-		Set(fieldDeletedAt, now).
-		Where(sq.Eq{
-			fieldFirstUserID:  authorID,
-			fieldSecondUserID: recipientID,
-			fieldDeletedAt:    nil,
-		}).
+	sql, args, err := sq.Insert(FriendTable).
+		Columns(friendFields...).
+		Values(params.FID, params.AuthorID, params.FollowerID, now).
+		Values(params.SID, params.FollowerID, params.AuthorID, now).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
@@ -236,10 +98,17 @@ func (s *Storage) DeleteFriend(ctx context.Context, authorID, recipientID model.
 
 	sql, args, err := sq.Update(FriendTable).
 		Set(fieldDeletedAt, now).
-		Where(sq.Eq{
-			fieldFirstUserID:  authorID,
-			fieldSecondUserID: recipientID,
-			fieldDeletedAt:    nil,
+		Where(sq.Or{
+			sq.Eq{
+				fieldFirstUserID:  authorID,
+				fieldSecondUserID: recipientID,
+				fieldDeletedAt:    nil,
+			},
+			sq.Eq{
+				fieldFirstUserID:  recipientID,
+				fieldSecondUserID: authorID,
+				fieldDeletedAt:    nil,
+			},
 		}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()

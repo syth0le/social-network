@@ -37,13 +37,7 @@ func (a *App) publicMux(env *env) *chi.Mux {
 		r.Use(env.authenticationService.AuthenticationInterceptor)
 
 		r.Get("/{userID}", handler.ListFriends)
-		r.Get("/followers/{userID}", handler.ListFollowers)
-		r.Get("/subscriptions/{userID}", handler.ListSubscriptions)
-
 		r.Put("/set/{userID}", handler.SetFriendRequest)
-		r.Put("/confirm/{userID}", handler.ConfirmFriendRequest)
-		r.Put("/decline/{userID}", handler.DeclineFriendRequest)
-		r.Put("/revoke/{userID}", handler.RevokeFriendRequest)
 		r.Put("/delete/{userID}", handler.DeleteFriend)
 	})
 

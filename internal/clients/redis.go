@@ -40,7 +40,7 @@ func NewRedisClient(endpoints []string) *RedisClient {
 			DisableIndentity:      false,
 			IdentitySuffix:        "",
 		}),
-		endpoints: endpoints,
+		// endpoints: endpoints,
 	}
 }
 

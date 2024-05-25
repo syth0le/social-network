@@ -41,7 +41,6 @@ const (
 
 	fieldFirstUserID  = "first_user_id"
 	fieldSecondUserID = "second_user_id"
-	fieldStatus       = "status"
 )
 
 var (
@@ -50,15 +49,11 @@ var (
 		fieldSex, fieldBirthdate, fieldBiography, fieldCity, fieldCreatedAt,
 	}
 	tokenFields  = []string{fieldID, fieldUserID, fieldToken, fieldCreatedAt, fieldAlivedAt}
-	friendFields = []string{
-		fieldID, fieldCreatedAt, fieldFirstUserID, fieldSecondUserID, fieldStatus, fieldCreatedAt, fieldUpdatedAt, fieldDeletedAt,
-	}
-	postFields = []string{fieldID, fieldUserID, fieldText, fieldCreatedAt, fieldUpdatedAt}
+	friendFields = []string{fieldID, fieldFirstUserID, fieldSecondUserID, fieldCreatedAt}
+	postFields   = []string{fieldID, fieldUserID, fieldText, fieldCreatedAt, fieldUpdatedAt}
 
-	returningUser   = returning + strings.Join(userFields, separator)
-	returningToken  = returning + strings.Join(tokenFields, separator)
-	returningFriend = returning + strings.Join(friendFields, separator)
-	returningPost   = returning + strings.Join(postFields, separator)
+	returningUser  = returning + strings.Join(userFields, separator)
+	returningToken = returning + strings.Join(tokenFields, separator)
 )
 
 func tableField(table, field string) string {

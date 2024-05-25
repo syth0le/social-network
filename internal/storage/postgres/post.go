@@ -116,8 +116,8 @@ func (s *Storage) GetFeed(ctx context.Context, userID model.UserID) ([]*model.Po
 		Join(joinString(PostTable, fieldUserID, UserTable, fieldID)).
 		Join(joinString(PostTable, fieldUserID, FriendTable, fieldUserID)). // TODO: join case
 		Where(sq.Eq{
-			tableField(PostTable, fieldDeletedAt):    nil,
-			tableField(FriendTable, fieldFollowerID): userID,
+			tableField(PostTable, fieldDeletedAt):      nil,
+			tableField(FriendTable, fieldSecondUserID): userID,
 		}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()

@@ -30,13 +30,9 @@ type TokenRepository interface {
 }
 
 type FriendRepository interface {
+	GetFriend(ctx context.Context, authorID, followerID model.UserID) (*model.Friend, error)
 	ListFriends(ctx context.Context, userID model.UserID) ([]*model.Friend, error)
-	ListFollowers(ctx context.Context, userID model.UserID) ([]*model.Friend, error)
-	ListSubscriptions(ctx context.Context, userID model.UserID) ([]*model.Friend, error)
-	SetFriendRequest(ctx context.Context, authorID, recipientID model.UserID) error
-	ConfirmFriendRequest(ctx context.Context, authorID, recipientID model.UserID) error
-	DeclineFriendRequest(ctx context.Context, authorID, recipientID model.UserID) error
-	RevokeFriendRequest(ctx context.Context, authorID, recipientID model.UserID) error
+	AddFriend(ctx context.Context, params *model.AddFriendParams) error
 	DeleteFriend(ctx context.Context, authorID, followerID model.UserID) error
 }
 

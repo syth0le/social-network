@@ -36,12 +36,11 @@ CREATE TABLE IF NOT EXISTS friend_table
     --              (the person which first_user_id = X and status = expected or declined) or
     --              (the person which second_user_id = id and status = revoked)
     --            )
-    status         TEXT                     NOT NULL
-        CONSTRAINT friendship_status_field CHECK (status in ('expected', 'accepted', 'declined', 'revoked')),
+--     status         TEXT                     NOT NULL
+--         CONSTRAINT friendship_status_field CHECK (status in ('expected', 'accepted', 'declined', 'revoked')),
 
 
     created_at     TIMESTAMP WITH TIME ZONE NOT NULL,
-    updated_at     TIMESTAMP WITH TIME ZONE NOT NULL,
     deleted_at     TIMESTAMP WITH TIME ZONE NOT NULL,
 
     CONSTRAINT pk_token_table PRIMARY KEY (id),

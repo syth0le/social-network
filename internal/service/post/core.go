@@ -36,6 +36,8 @@ func (s ServiceImpl) Create(ctx context.Context, params *CreatePostParams) error
 		return fmt.Errorf("create post: %w", err)
 	}
 
+	// вот тут ставить задачу в очередь (нужна транзакция)
+
 	return nil
 }
 
