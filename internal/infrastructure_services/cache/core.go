@@ -110,6 +110,7 @@ func (s *ServiceImpl) GetFeedByUserID(ctx context.Context, id model.UserID) ([]*
 		return nil, fmt.Errorf("key %s not found in Redis cache: %w", id.String(), err)
 	}
 
+	// TODO: make RPUSH with check LLEN (if len > 1000 {LPOP + RPUSH the next one elem})
 	posts := make([]*model.Post, len(mapPosts))
 	acc := 0
 	for _, val := range mapPosts {
@@ -123,11 +124,6 @@ func (s *ServiceImpl) GetFeedByUserID(ctx context.Context, id model.UserID) ([]*
 	}
 
 	return posts, nil
-}
-
-func (s *ServiceImpl) Run() error {
-
-	return nil
 }
 
 func makeHash(hashType HashType, key string) (string, error) {
