@@ -14,6 +14,8 @@ type Config struct {
 	PublicServer xservers.ServerConfig  `yaml:"public_server"`
 	AdminServer  xservers.ServerConfig  `yaml:"admin_server"`
 	Storage      xstorage.StorageConfig `yaml:"storage"`
+	Cache        RedisConfig            `yaml:"cache"`
+	Queue        RabbitConfig           `yaml:"queue"`
 }
 
 func (c *Config) Validate() error {
@@ -29,4 +31,20 @@ type ApplicationConfig struct {
 
 func (c *ApplicationConfig) Validate() error {
 	return nil // todo
+}
+
+type RedisConfig struct {
+	Enable             bool          `yaml:"enable"`
+	Address            string        `yaml:"address"`
+	Password           string        `yaml:"password" env:"CACHE_DB_PASSWORD"`
+	Database           int           `yaml:"database"`
+	ExpirationDuration time.Duration `yaml:"expiration_duration"`
+}
+
+type RabbitConfig struct {
+	Enable       bool   `yaml:"enable"`
+	Address      string `yaml:"address"`
+	QueueName    string `yaml:"queue_name"`
+	RoutingKey   string `yaml:"routing_key"`
+	ExchangeName string `yaml:"exchange_name"`
 }

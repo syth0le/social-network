@@ -26,3 +26,15 @@ storage:
 application:
   app: "social-network"
   salt_value: "xamah6Ael!iat0n"
+
+cache:
+  enable: true
+  address: "redis-cache:6379"
+  password: "password"
+
+queue:
+  enable: true
+  address: "amqp://guest:guest@message-broker:5672"
+  queue_name: "snw-queue"
+  routing_key: "snw-routing-key"
+  exchange_name: "events"

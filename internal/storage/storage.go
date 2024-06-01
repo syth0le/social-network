@@ -37,7 +37,7 @@ type FriendRepository interface {
 }
 
 type PostRepository interface {
-	Create(ctx context.Context, params *model.CreatePostParams) error
+	Create(ctx context.Context, params *model.CreatePostParams) (*model.Post, error)
 	Get(ctx context.Context, postID model.PostID) (*model.Post, error)
 	Update(ctx context.Context, postID model.PostID, text string) error
 	Delete(ctx context.Context, postID model.PostID) error

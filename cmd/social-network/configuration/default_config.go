@@ -48,5 +48,19 @@ func NewDefaultConfig() *Config {
 			ConnectionAttempts:    0,
 			InitializationTimeout: 5 * time.Second,
 		},
+		Cache: RedisConfig{
+			Enable:             false,
+			Address:            "",
+			Password:           "",
+			Database:           0,
+			ExpirationDuration: 5 * time.Minute,
+		},
+		Queue: RabbitConfig{
+			Enable:       false,
+			Address:      "",
+			QueueName:    "",
+			RoutingKey:   "",
+			ExchangeName: "",
+		},
 	}
 }

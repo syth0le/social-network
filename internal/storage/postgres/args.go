@@ -54,6 +54,7 @@ var (
 
 	returningUser  = returning + strings.Join(userFields, separator)
 	returningToken = returning + strings.Join(tokenFields, separator)
+	returningPost  = returning + strings.Join(postFields, separator)
 )
 
 func tableField(table, field string) string {

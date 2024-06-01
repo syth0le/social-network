@@ -83,10 +83,41 @@ services:
 #    restart: always
 #    networks:
 #      - mynet
+  cache:
+    build:
+      context: infra/redis
+      dockerfile: Dockerfile
+    container_name: redis-cache
+    image: redis:7.2.5
+    ##    for debugging
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-cache-data:/data
+    networks:
+      - mynet
+  message-broker:
+    image: rabbitmq:3-management-alpine
+    container_name: message-broker
+    ports:
+      - "5672:5672"   # for sender and consumer connections
+      - "15672:15672" # for serve RabbitMQ GUI
+    volumes:
+      - ${HOME}/dev-rabbitmq/data/:/var/lib/rabbitmq
+      - ${HOME}/dev-rabbitmq/log/:/var/log/rabbitmq
+    restart: always
+    networks:
+      - mynet
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 5s
+      timeout: 15s
+      retries: 5
 
 volumes:
   postgres-db-master:
   postgres-db-slave:
+  redis-cache-data:
 
 networks:
   mynet:

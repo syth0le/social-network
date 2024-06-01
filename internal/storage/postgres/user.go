@@ -41,7 +41,9 @@ func (s *Storage) CreateUser(ctx context.Context, params *model.UserRegister) (*
 	if err != nil {
 		return nil, fmt.Errorf("params validate: %w", err)
 	}
+
 	now := time.Now().Truncate(time.Millisecond)
+
 	sql, args, err := sq.Insert(UserTable).
 		Columns(userFields...).
 		Values(params.ID, params.Username, params.HashedPassword, params.FirstName, params.SecondName,
@@ -64,7 +66,7 @@ func (s *Storage) CreateUser(ctx context.Context, params *model.UserRegister) (*
 }
 
 func (s *Storage) GetUserByID(ctx context.Context, id model.UserID) (*model.User, error) {
-	//s.storage.logger.Sugar().Infof("some info for debug: %v", id) TODO make storage logger
+	// s.storage.logger.Sugar().Infof("some info for debug: %v", id) TODO make storage logger
 	sql, args, err := sq.Select(userFields...).
 		From(UserTable).
 		Where(sq.Eq{

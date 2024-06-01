@@ -30,7 +30,7 @@ func (h *Handler) writeError(ctx context.Context, w http.ResponseWriter, err err
 	w.Header().Set(headers.ContentType, "application/json")
 	errorResult, ok := xerrors.FromError(err)
 	if !ok {
-		h.Logger.Error("cannot write log message")
+		h.Logger.Sugar().Errorf("cannot write log message: %v", err)
 		return
 	}
 	w.WriteHeader(errorResult.StatusCode)

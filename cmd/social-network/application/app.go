@@ -9,6 +9,10 @@ import (
 
 	"social-network/cmd/social-network/configuration"
 	"social-network/internal/authentication"
+	"social-network/internal/clients/rabbit"
+	"social-network/internal/clients/redis"
+	"social-network/internal/infrastructure_services/cache"
+	"social-network/internal/infrastructure_services/queue"
 	"social-network/internal/service/friend"
 	"social-network/internal/service/post"
 	"social-network/internal/service/user"
@@ -66,12 +70,13 @@ func (a *App) constructEnv(ctx context.Context) (*env, error) {
 	}
 	a.Closer.Add(postgresDB.Close)
 
-	// redisDB, err := redis.NewStorage(a.Logger, a.Config.Storage) // TODO: move to gopnik
-	// redisClient := clients.NewRedisClient(a.Logger, a.Config.Redis)
-	// if err != nil {
-	//	return nil, fmt.Errorf("new redis client: %w", err)
-	// }
-	// a.Closer.Add(redisClient.Close)
+	redisClient := redis.NewRedisClient(a.Logger, a.Config.Cache) // TODO: move to gopnik
+	if err != nil {
+		return nil, fmt.Errorf("new redis client: %w", err)
+	}
+	a.Closer.Add(redisClient.Close)
+
+	cacheService := &cache.ServiceImpl{Client: redisClient, Logger: a.Logger}
 
 	// redisDB, err := kafka.NewProducer(a.Logger, a.Config.Storage) // TODO: move to gopnik
 	// kafkaConsumer := clients.NewKafkaConsumer(a.Logger, a.Config.Redis)
@@ -80,11 +85,38 @@ func (a *App) constructEnv(ctx context.Context) (*env, error) {
 	// }
 	// a.Closer.Add(kafkaConsumer.Close)
 
+	publisher, err := rabbit.NewRabbitPublisher(a.Logger, a.Config.Queue) // TODO: move to gopnik
+	if err != nil {
+		return nil, fmt.Errorf("new rabbit publisher: %w", err)
+	}
+	a.Closer.Add(publisher.Close)
+
+	consumer, err := rabbit.NewRabbitConsumer(a.Logger, a.Config.Queue) // TODO: move to gopnik
+	if err != nil {
+		return nil, fmt.Errorf("new rabbit consumer: %w", err)
+	}
+	a.Closer.Add(consumer.Close)
+
 	tokenManager := token.NewManager(a.Config.Application)
 	userService := &user.ServiceImpl{
 		Storage:      postgresDB,
 		TokenManager: tokenManager,
 	}
+
+	friendService := &friend.ServiceImpl{Storage: postgresDB}
+
+	producerService := &queue.ProducerService{
+		Logger:   a.Logger,
+		Producer: publisher,
+	}
+
+	consumerService := queue.ConsumerService{
+		Logger:        a.Logger,
+		Consumer:      consumer,
+		FriendService: friendService,
+		CacheService:  cacheService,
+	}
+	a.Closer.Run(consumerService.Run)
 
 	return &env{
 		userService: userService,
@@ -93,7 +125,12 @@ func (a *App) constructEnv(ctx context.Context) (*env, error) {
 			TokenManager: tokenManager,
 			Logger:       a.Logger,
 		},
-		postService:   &post.ServiceImpl{Storage: postgresDB}, // TODO: add redis
-		friendService: &friend.ServiceImpl{Storage: postgresDB},
+		postService: &post.ServiceImpl{
+			Storage:         postgresDB,
+			Cache:           cacheService,
+			Logger:          a.Logger,
+			ProducerService: producerService,
+		},
+		friendService: friendService,
 	}, nil
 }

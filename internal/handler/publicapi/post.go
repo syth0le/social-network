@@ -16,42 +16,41 @@ type createPostRequest struct {
 }
 
 func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
-	handleRequest := func() error {
+	handleRequest := func() (*postResponse, error) {
 		ctx := r.Context()
 
 		userIDStr := ctx.Value(authentication.UserIDValue)
 		if userIDStr == "" {
-			return fmt.Errorf("cannot recognize userID")
+			return nil, fmt.Errorf("cannot recognize userID")
 		}
 
 		request, err := parseJSONRequest[createPostRequest](r)
 		if err != nil {
-			return fmt.Errorf("parse json request: %w", err)
+			return nil, fmt.Errorf("parse json request: %w", err)
 		}
 
-		err = h.PostService.Create(ctx, &post.CreatePostParams{
+		postModel, err := h.PostService.Create(ctx, &post.CreatePostParams{
 			UserID: userIDStr.(model.UserID),
 			Text:   request.Text,
 		})
 		if err != nil {
-			return fmt.Errorf("post create: %w", err)
+			return nil, fmt.Errorf("post create: %w", err)
 		}
 
-		return nil
+		return postModelToResponse(postModel), nil
 	}
 
-	err := handleRequest()
+	response, err := handleRequest()
 	if err != nil {
 		h.writeError(r.Context(), w, fmt.Errorf("create post: %w", err))
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+	writeResponse(w, response)
 }
 
 type postResponse struct {
 	ID       string `json:"id"`
 	Text     string `json:"text"`
-	Author   string `json:"author"`
 	AuthorID string `json:"author_id"`
 }
 
@@ -169,7 +168,6 @@ func postModelToResponse(post *model.Post) *postResponse {
 	return &postResponse{
 		ID:       post.ID.String(),
 		Text:     post.Text,
-		Author:   post.Author,
 		AuthorID: post.AuthorID.String(),
 	}
 }
