@@ -31,7 +31,7 @@ cache:
   enable: true
   address: "redis-cache:6379"
   password: "password"
-  max_list_range: 2
+#  max_list_range: 2
 
 queue:
   enable: true
