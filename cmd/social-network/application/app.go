@@ -12,6 +12,7 @@ import (
 	"social-network/internal/clients/rabbit"
 	"social-network/internal/clients/redis"
 	"social-network/internal/infrastructure_services/cache"
+	"social-network/internal/infrastructure_services/heater"
 	"social-network/internal/infrastructure_services/queue"
 	"social-network/internal/service/friend"
 	"social-network/internal/service/post"
@@ -110,6 +111,13 @@ func (a *App) constructEnv(ctx context.Context) (*env, error) {
 		Producer: publisher,
 	}
 
+	postService := &post.ServiceImpl{
+		Storage:         postgresDB,
+		Cache:           cacheService,
+		Logger:          a.Logger,
+		ProducerService: producerService,
+	}
+
 	consumerService := queue.ConsumerService{
 		Logger:        a.Logger,
 		Consumer:      consumer,
@@ -118,6 +126,18 @@ func (a *App) constructEnv(ctx context.Context) (*env, error) {
 	}
 	a.Closer.Run(consumerService.Run)
 
+	cacheHeater := heater.HeaterService{
+		Logger:         a.Logger,
+		CacheService:   cacheService,
+		PostService:    postService,
+		FriendService:  friendService,
+		HeaterDuration: a.Config.Cache.HeaterDuration,
+	}
+	err = cacheHeater.Run(ctx) // todo: make http admin handler for heater
+	if err != nil {
+		return nil, fmt.Errorf("cannot heating cache: %w", err)
+	}
+
 	return &env{
 		userService: userService,
 		authenticationService: authentication.Service{
@@ -125,12 +145,7 @@ func (a *App) constructEnv(ctx context.Context) (*env, error) {
 			TokenManager: tokenManager,
 			Logger:       a.Logger,
 		},
-		postService: &post.ServiceImpl{
-			Storage:         postgresDB,
-			Cache:           cacheService,
-			Logger:          a.Logger,
-			ProducerService: producerService,
-		},
+		postService:   postService,
 		friendService: friendService,
 	}, nil
 }

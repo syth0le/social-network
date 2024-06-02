@@ -39,6 +39,7 @@ type RedisConfig struct {
 	Password           string        `yaml:"password" env:"CACHE_DB_PASSWORD"`
 	Database           int           `yaml:"database"`
 	ExpirationDuration time.Duration `yaml:"expiration_duration"`
+	HeaterDuration     time.Duration `yaml:"heater_duration"`
 }
 
 type RabbitConfig struct {

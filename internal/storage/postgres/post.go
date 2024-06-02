@@ -133,6 +133,37 @@ func (s *Storage) GetFeed(ctx context.Context, userID model.UserID) ([]*model.Po
 	return postEntitiesToModels(entities), nil
 }
 
+func (s *Storage) GetLastPosts(ctx context.Context, duration time.Duration) ([]*model.Post, error) {
+	now := time.Now().Truncate(time.Millisecond)
+	creationDateThreshold := now.Add(-duration)
+
+	sql, args, err := sq.Select(postFields...).
+		From(PostTable).
+		Where(
+			sq.And{
+				sq.GtOrEq{
+					fieldCreatedAt: creationDateThreshold,
+				},
+				sq.Eq{
+					fieldDeletedAt: nil,
+				},
+			},
+		).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
+	}
+
+	var entities []postEntity
+	err = sqlx.SelectContext(ctx, s.Slave(), &entities, sql, args...)
+	if err != nil {
+		return nil, xerrors.WrapSqlError(err)
+	}
+
+	return postEntitiesToModels(entities), nil
+}
+
 type postEntity struct {
 	ID        string `db:"id"`
 	Text      string `db:"text"`

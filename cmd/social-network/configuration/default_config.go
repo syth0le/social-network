@@ -54,6 +54,7 @@ func NewDefaultConfig() *Config {
 			Password:           "",
 			Database:           0,
 			ExpirationDuration: 5 * time.Minute,
+			HeaterDuration:     24 * time.Hour,
 		},
 		Queue: RabbitConfig{
 			Enable:       false,

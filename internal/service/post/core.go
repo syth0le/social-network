@@ -3,6 +3,7 @@ package post
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"go.uber.org/zap"
 
@@ -19,6 +20,7 @@ type Service interface {
 	Update(ctx context.Context, params *UpdatePostParams) error
 	Delete(ctx context.Context, params *DeletePostParams) error
 	GetFeed(ctx context.Context, params *GetFeedParams) ([]*model.Post, error)
+	GetLastPosts(ctx context.Context, params *GetLastPostsParams) ([]*model.Post, error)
 }
 
 type ServiceImpl struct {
@@ -116,6 +118,23 @@ func (s *ServiceImpl) GetFeed(ctx context.Context, params *GetFeedParams) ([]*mo
 	s.Logger.Sugar().Infof("cannot get feed by user id from cache: %s - %v", params.FollowerID, err)
 
 	posts, err := s.Storage.Post().GetFeed(ctx, params.FollowerID)
+	if err != nil {
+		return nil, fmt.Errorf("get feed: %w", err)
+	}
+
+	return posts, nil
+}
+
+type GetLastPostsParams struct {
+	Duration time.Duration
+}
+
+func (s *ServiceImpl) GetLastPosts(ctx context.Context, params *GetLastPostsParams) ([]*model.Post, error) {
+	if params.Duration == 0 {
+		return nil, fmt.Errorf("duration cannot be nil")
+	}
+
+	posts, err := s.Storage.Post().GetLastPosts(ctx, params.Duration)
 	if err != nil {
 		return nil, fmt.Errorf("get feed: %w", err)
 	}

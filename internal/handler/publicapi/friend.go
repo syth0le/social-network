@@ -57,7 +57,7 @@ func (h *Handler) SetFriendRequest(w http.ResponseWriter, r *http.Request) {
 		}
 
 		authorID := chi.URLParamFromCtx(ctx, "userID")
-		fmt.Println(userIDStr)
+
 		err := h.FriendService.AddFriend(ctx, &friend.AddFriendParams{
 			AuthorID:   userIDStr.(model.UserID),
 			FollowerID: model.UserID(authorID),

@@ -27,7 +27,6 @@ type Service interface {
 	GetPostByID(ctx context.Context, id model.PostID) (*model.Post, error)
 	AddPostForUser(ctx context.Context, userID model.UserID, post *model.Post) error
 	GetFeedByUserID(ctx context.Context, id model.UserID) ([]*model.Post, error)
-	Run() error
 }
 
 type ServiceImpl struct {
@@ -79,7 +78,7 @@ func (s *ServiceImpl) AddPostForUser(ctx context.Context, userID model.UserID, p
 		return fmt.Errorf("cache set: %w", err)
 	}
 
-	s.Logger.Sugar().Infof("key %s saved in cache", keyHash)
+	s.Logger.Sugar().Debugf("key %s saved in cache", keyHash)
 
 	return nil
 }

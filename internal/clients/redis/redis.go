@@ -30,6 +30,7 @@ type ClientImpl struct {
 	ExpirationDuration time.Duration
 }
 
+// TODO: make cache heater
 func NewRedisClient(logger *zap.Logger, cfg configuration.RedisConfig) Client {
 	if !cfg.Enable {
 		return &ClientMock{Logger: logger}

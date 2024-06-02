@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"time"
 
 	"social-network/internal/model"
 )
@@ -42,4 +43,5 @@ type PostRepository interface {
 	Update(ctx context.Context, postID model.PostID, text string) error
 	Delete(ctx context.Context, postID model.PostID) error
 	GetFeed(ctx context.Context, userID model.UserID) ([]*model.Post, error)
+	GetLastPosts(ctx context.Context, duration time.Duration) ([]*model.Post, error)
 }
