@@ -55,6 +55,7 @@ func NewDefaultConfig() *Config {
 			Database:           0,
 			ExpirationDuration: 5 * time.Minute,
 			HeaterDuration:     24 * time.Hour,
+			MaxListRange:       1000,
 		},
 		Queue: RabbitConfig{
 			Enable:       false,

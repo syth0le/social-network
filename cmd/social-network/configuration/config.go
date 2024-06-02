@@ -40,6 +40,7 @@ type RedisConfig struct {
 	Database           int           `yaml:"database"`
 	ExpirationDuration time.Duration `yaml:"expiration_duration"`
 	HeaterDuration     time.Duration `yaml:"heater_duration"`
+	MaxListRange       int64         `yaml:"max_list_range"`
 }
 
 type RabbitConfig struct {

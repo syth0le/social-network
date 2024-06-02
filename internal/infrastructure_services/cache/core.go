@@ -14,6 +14,8 @@ import (
 const (
 	PostHashType HashType = "post"
 	UserHashType HashType = "user"
+
+	defaultRange = 1000 // TODO: pagination
 )
 
 type HashType string
@@ -62,20 +64,9 @@ func (s *ServiceImpl) AddPostForUser(ctx context.Context, userID model.UserID, p
 		return fmt.Errorf("make hash: %w", err)
 	}
 
-	fieldHash, err := makeHash(PostHashType, post.ID.String())
+	err = s.Client.LPush(ctx, keyHash, post)
 	if err != nil {
-		return fmt.Errorf("make hash: %w", err)
-	}
-
-	err = s.Client.HSetNX(
-		ctx,
-		false,
-		keyHash,
-		fieldHash,
-		post,
-	)
-	if err != nil {
-		return fmt.Errorf("cache set: %w", err)
+		return fmt.Errorf("cache lpush: %w", err)
 	}
 
 	s.Logger.Sugar().Debugf("key %s saved in cache", keyHash)
@@ -104,15 +95,14 @@ func (s *ServiceImpl) GetFeedByUserID(ctx context.Context, id model.UserID) ([]*
 		return nil, fmt.Errorf("make hash: %w", err)
 	}
 
-	mapPosts, err := s.Client.HGetAll(ctx, keyHash)
+	listPosts, err := s.Client.LRange(ctx, keyHash, 0, defaultRange) // TODO: make pagination
 	if err != nil {
 		return nil, fmt.Errorf("key %s not found in Redis cache: %w", id.String(), err)
 	}
 
-	// TODO: make RPUSH with check LLEN (if len > 1000 {LPOP + RPUSH the next one elem})
-	posts := make([]*model.Post, len(mapPosts))
+	posts := make([]*model.Post, len(listPosts))
 	acc := 0
-	for _, val := range mapPosts {
+	for _, val := range listPosts {
 		post := new(model.Post)
 		if err = post.UnmarshalBinary([]byte(val)); err != nil {
 			return nil, fmt.Errorf("unmarshal binary: %w", err)

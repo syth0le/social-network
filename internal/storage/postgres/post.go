@@ -149,6 +149,7 @@ func (s *Storage) GetLastPosts(ctx context.Context, duration time.Duration) ([]*
 				},
 			},
 		).
+		OrderBy(fieldCreatedAt).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
