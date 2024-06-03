@@ -43,6 +43,11 @@ func (s *HeaterService) Run(ctx context.Context) error {
 				return fmt.Errorf("add post for user: %w", err)
 			}
 		}
+
+		err = s.CacheService.AddPost(ctx, postEntity)
+		if err != nil {
+			return fmt.Errorf("add post: %w", err)
+		}
 	}
 
 	s.Logger.Info("heating cache successfully finished")
