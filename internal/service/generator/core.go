@@ -34,7 +34,7 @@ type ServiceImpl struct {
 
 func (s *ServiceImpl) BatchGenerateUsers(ctx context.Context) error {
 	// TODO: make atomic transaction
-	usersList := s.readData()
+	usersList := s.readUsersData()
 	var usersListForBatchCreate []*model.UserRegister
 	counter := 0
 	for _, user := range usersList {
@@ -72,7 +72,7 @@ func (s *ServiceImpl) BatchGenerateUsers(ctx context.Context) error {
 	return nil
 }
 
-func (s *ServiceImpl) readData() []*model.UserRegister {
+func (s *ServiceImpl) readUsersData() []*model.UserRegister {
 	s.Logger.Info("starting read data...")
 
 	file, err := os.Open(s.DataFile)
