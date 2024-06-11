@@ -61,7 +61,7 @@ func (s *Storage) Get(ctx context.Context, postID model.PostID) (*model.Post, er
 	return postEntityToModel(entity), nil
 }
 
-func (s *Storage) Update(ctx context.Context, postID model.PostID, text string) error {
+func (s *Storage) Update(ctx context.Context, postID model.PostID, text string) (*model.Post, error) {
 	now := time.Now().Truncate(time.Millisecond)
 
 	sql, args, err := sq.Update(PostTable).
@@ -71,21 +71,23 @@ func (s *Storage) Update(ctx context.Context, postID model.PostID, text string) 
 			fieldID:        postID,
 			fieldDeletedAt: nil,
 		}).
+		Suffix(returningPost).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
+		return nil, xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
 	}
 
-	_, err = s.Master().ExecContext(ctx, sql, args...)
+	var entity postEntity
+	err = sqlx.GetContext(ctx, s.Master(), &entity, sql, args...)
 	if err != nil {
-		return xerrors.WrapSqlError(err)
+		return nil, xerrors.WrapSqlError(err)
 	}
 
-	return nil
+	return postEntityToModel(entity), nil
 }
 
-func (s *Storage) Delete(ctx context.Context, postID model.PostID) error {
+func (s *Storage) Delete(ctx context.Context, postID model.PostID) (*model.Post, error) {
 	now := time.Now().Truncate(time.Millisecond)
 
 	sql, args, err := sq.Update(PostTable).
@@ -94,18 +96,20 @@ func (s *Storage) Delete(ctx context.Context, postID model.PostID) error {
 			fieldID:        postID,
 			fieldDeletedAt: nil,
 		}).
+		Suffix(returningPost).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
+		return nil, xerrors.WrapInternalError(fmt.Errorf("incorrect sql"))
 	}
 
-	_, err = s.Master().ExecContext(ctx, sql, args...)
+	var entity postEntity
+	err = sqlx.GetContext(ctx, s.Master(), &entity, sql, args...)
 	if err != nil {
-		return xerrors.WrapSqlError(err)
+		return nil, xerrors.WrapSqlError(err)
 	}
 
-	return nil
+	return postEntityToModel(entity), nil
 }
 
 func (s *Storage) GetFeed(ctx context.Context, userID model.UserID) ([]*model.Post, error) {

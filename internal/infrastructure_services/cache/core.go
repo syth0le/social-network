@@ -30,6 +30,7 @@ type Service interface {
 	GetPostByID(ctx context.Context, id model.PostID) (*model.Post, error)
 	AddPostForUser(ctx context.Context, userID model.UserID, post *model.Post) error
 	GetFeedByUserID(ctx context.Context, id model.UserID) ([]*model.Post, error)
+	DeletePostForUser(ctx context.Context, userID model.UserID, post *model.Post) error
 }
 
 type ServiceImpl struct {
@@ -59,7 +60,7 @@ func (s *ServiceImpl) AddPost(ctx context.Context, post *model.Post) error {
 	return nil
 }
 
-func (s *ServiceImpl) DeletePost(ctx context.Context, id *model.PostID) error {
+func (s *ServiceImpl) DeletePost(ctx context.Context, id model.PostID) error {
 	keyHash, err := makeHash(PostHashType, id.String())
 	if err != nil {
 		return fmt.Errorf("make hash: %w", err)
@@ -80,6 +81,22 @@ func (s *ServiceImpl) AddPostForUser(ctx context.Context, userID model.UserID, p
 	}
 
 	err = s.Client.LPush(ctx, keyHash, post)
+	if err != nil {
+		return fmt.Errorf("cache lpush: %w", err)
+	}
+
+	s.Logger.Sugar().Debugf("key %s saved in cache", keyHash)
+
+	return nil
+}
+
+func (s *ServiceImpl) DeletePostForUser(ctx context.Context, userID model.UserID, post *model.Post) error {
+	keyHash, err := makeHash(UserHashType, userID.String())
+	if err != nil {
+		return fmt.Errorf("make hash: %w", err)
+	}
+
+	err = s.Client.LRem(ctx, keyHash, post)
 	if err != nil {
 		return fmt.Errorf("cache lpush: %w", err)
 	}

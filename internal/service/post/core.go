@@ -53,7 +53,7 @@ func (s *ServiceImpl) Create(ctx context.Context, params *CreatePostParams) (*mo
 
 	err = s.ProducerService.CreateFeed(post)
 	if err != nil {
-		return nil, fmt.Errorf("publish to queue: %w", err)
+		return nil, fmt.Errorf("publish to queue: create feed : %w", err)
 	}
 
 	return post, nil
@@ -84,12 +84,32 @@ type UpdatePostParams struct {
 }
 
 func (s *ServiceImpl) Update(ctx context.Context, params *UpdatePostParams) error {
-	err := s.Storage.Post().Update(ctx, params.PostID, params.Text)
+	// TODO: transaction
+	// at first delete previous version from cache and then add new patched one (по сути мега тупой апдейт в лоб)
+	previousPost, err := s.Storage.Post().Get(ctx, params.PostID)
 	if err != nil {
 		return fmt.Errorf("update post: %w", err)
 	}
 
-	// TODO: invalidate cache
+	err = s.ProducerService.DeleteFromFeed(previousPost)
+	if err != nil {
+		return fmt.Errorf("publish to queue: delete from feed : %w", err)
+	}
+
+	post, err := s.Storage.Post().Update(ctx, params.PostID, params.Text)
+	if err != nil {
+		return fmt.Errorf("update post: %w", err)
+	}
+
+	err = s.Cache.AddPost(ctx, post)
+	if err != nil {
+		return fmt.Errorf("add post to cache: %w", err)
+	}
+
+	err = s.ProducerService.CreateFeed(post)
+	if err != nil {
+		return fmt.Errorf("publish to queue: create feed : %w", err)
+	}
 
 	return nil
 }
@@ -99,16 +119,20 @@ type DeletePostParams struct {
 }
 
 func (s *ServiceImpl) Delete(ctx context.Context, params *DeletePostParams) error {
-	err := s.Storage.Post().Delete(ctx, params.PostID)
+	post, err := s.Storage.Post().Delete(ctx, params.PostID)
 	if err != nil {
 		return fmt.Errorf("delete post: %w", err)
 	}
 
-	// TODO: invalidate cache from feeds (hard logic)
 	err = s.Cache.DeletePost(ctx, params.PostID)
 	if err != nil {
 		s.Logger.Sugar().Warnf("cannot delete from cache: %v", err)
 		return nil
+	}
+
+	err = s.ProducerService.DeleteFromFeed(post)
+	if err != nil {
+		return fmt.Errorf("publish to queue: delete from feed: %w", err)
 	}
 
 	return nil

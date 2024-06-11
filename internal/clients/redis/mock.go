@@ -44,6 +44,11 @@ func (c *ClientMock) LRange(ctx context.Context, key string, start, stop int64) 
 	return nil, xerrors.WrapNotFoundError(fmt.Errorf("cannot find smth in cache mock"), "not found in cache")
 }
 
+func (c *ClientMock) LRem(ctx context.Context, key string, value encoding.BinaryMarshaler) error {
+	c.Logger.Debug("lrem through cache mock")
+	return nil
+}
+
 func (c *ClientMock) Delete(ctx context.Context, keys ...string) error {
 	c.Logger.Debug("del through cache mock")
 	return nil

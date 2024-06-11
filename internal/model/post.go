@@ -50,3 +50,31 @@ func (p *CreatePostParams) Validate() error {
 	}
 	return nil
 }
+
+type Action string
+
+func (id Action) String() string {
+	return string(id)
+}
+
+const (
+	CreateAction Action = "CREATE"
+	DeleteAction Action = "DELETE"
+)
+
+type PostAction struct {
+	Action Action
+	Post   *Post
+}
+
+func (p *PostAction) MarshalBinary() ([]byte, error) {
+	return json.Marshal(p)
+}
+
+func (p *PostAction) UnmarshalBinary(data []byte) error {
+	if err := json.Unmarshal(data, &p); err != nil {
+		return err
+	}
+
+	return nil
+}

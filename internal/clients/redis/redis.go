@@ -24,6 +24,7 @@ type Client interface {
 	HSetNX(ctx context.Context, hasTTL bool, key string, field string, value encoding.BinaryMarshaler) error
 	LPush(ctx context.Context, key string, value encoding.BinaryMarshaler) error
 	LRange(ctx context.Context, key string, start, stop int64) ([]string, error)
+	LRem(ctx context.Context, key string, value encoding.BinaryMarshaler) error
 	Delete(ctx context.Context, keys ...string) error
 	Close() error
 }
@@ -116,11 +117,6 @@ func (c *ClientImpl) HSetNX(ctx context.Context, hasTTL bool, key string, field 
 
 func (c *ClientImpl) LPush(ctx context.Context, key string, value encoding.BinaryMarshaler) error {
 	_, err := c.Client.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
-		// binary, err := value.MarshalBinary()
-		// if err != nil {
-		// 	return fmt.Errorf("marshal binary: %w", err)
-		// }
-
 		_, err := pipe.LPush(ctx, key, value).Result()
 		if err != nil {
 			return fmt.Errorf("lpush: %w", err)
@@ -155,6 +151,15 @@ func (c *ClientImpl) LRange(ctx context.Context, key string, start, stop int64) 
 	}
 
 	return list, nil
+}
+
+func (c *ClientImpl) LRem(ctx context.Context, key string, value encoding.BinaryMarshaler) error {
+	_, err := c.Client.LRem(ctx, key, 0, value).Result()
+	if err != nil {
+		return fmt.Errorf("ltrim: %w", err)
+	}
+
+	return nil
 }
 
 func (c *ClientImpl) Delete(ctx context.Context, keys ...string) error {
