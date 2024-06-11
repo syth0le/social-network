@@ -89,6 +89,8 @@ func (s *ServiceImpl) Update(ctx context.Context, params *UpdatePostParams) erro
 		return fmt.Errorf("update post: %w", err)
 	}
 
+	// TODO: invalidate cache
+
 	return nil
 }
 
@@ -102,6 +104,7 @@ func (s *ServiceImpl) Delete(ctx context.Context, params *DeletePostParams) erro
 		return fmt.Errorf("delete post: %w", err)
 	}
 
+	// TODO: invalidate cache from feeds (hard logic)
 	err = s.Cache.DeletePost(ctx, params.PostID)
 	if err != nil {
 		s.Logger.Sugar().Warnf("cannot delete from cache: %v", err)
