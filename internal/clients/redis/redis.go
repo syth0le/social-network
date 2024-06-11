@@ -24,6 +24,7 @@ type Client interface {
 	HSetNX(ctx context.Context, hasTTL bool, key string, field string, value encoding.BinaryMarshaler) error
 	LPush(ctx context.Context, key string, value encoding.BinaryMarshaler) error
 	LRange(ctx context.Context, key string, start, stop int64) ([]string, error)
+	Delete(ctx context.Context, keys ...string) error
 	Close() error
 }
 
@@ -154,4 +155,13 @@ func (c *ClientImpl) LRange(ctx context.Context, key string, start, stop int64) 
 	}
 
 	return list, nil
+}
+
+func (c *ClientImpl) Delete(ctx context.Context, keys ...string) error {
+	_, err := c.Client.Del(ctx, keys...).Result()
+	if err != nil {
+		return fmt.Errorf("del keys: %w", err)
+	}
+
+	return nil
 }

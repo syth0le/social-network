@@ -102,6 +102,12 @@ func (s *ServiceImpl) Delete(ctx context.Context, params *DeletePostParams) erro
 		return fmt.Errorf("delete post: %w", err)
 	}
 
+	err = s.Cache.DeletePost(ctx, params.PostID)
+	if err != nil {
+		s.Logger.Sugar().Warnf("cannot delete from cache: %v", err)
+		return nil
+	}
+
 	return nil
 }
 
