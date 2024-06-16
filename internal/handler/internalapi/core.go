@@ -11,16 +11,16 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/syth0le/social-network/internal/authentication"
-	internalapi2 "github.com/syth0le/social-network/pkg/proto/internalapi"
+	"github.com/syth0le/social-network/proto/internalapi"
 )
 
 type AuthHandler struct {
-	internalapi2.UnimplementedAuthServiceServer
+	internalapi.UnimplementedAuthServiceServer
 
 	AuthService authentication.Service
 }
 
-func (h *AuthHandler) ValidateToken(ctx context.Context, request *internalapi2.ValidateTokenRequest) (*emptypb.Empty, error) {
+func (h *AuthHandler) ValidateToken(ctx context.Context, request *internalapi.ValidateTokenRequest) (*emptypb.Empty, error) {
 	err := h.AuthService.ValidateToken(request.Token)
 	if err != nil {
 		return nil, GRPCError(fmt.Errorf("validate token: %w", err))
