@@ -6,9 +6,9 @@ import (
 
 	"go.uber.org/zap"
 
-	"social-network/cmd/users-generator/configuration"
-	"social-network/internal/service/generator"
-	"social-network/internal/storage/postgres"
+	"github.com/syth0le/social-network/cmd/users-generator/configuration"
+	"github.com/syth0le/social-network/internal/service/generator"
+	"github.com/syth0le/social-network/internal/storage/postgres"
 )
 
 type App struct {

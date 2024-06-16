@@ -9,7 +9,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	xerrors "github.com/syth0le/gopnik/errors"
 
-	"social-network/internal/model"
+	"github.com/syth0le/social-network/internal/model"
 )
 
 func (s *Storage) GetFriend(ctx context.Context, authorID, followerID model.UserID) (*model.Friend, error) {

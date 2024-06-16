@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"social-network/internal/model"
-	"social-network/internal/storage"
-	"social-network/internal/utils"
+	"github.com/syth0le/social-network/internal/model"
+	"github.com/syth0le/social-network/internal/storage"
+	"github.com/syth0le/social-network/internal/utils"
 )
 
 type Service interface {

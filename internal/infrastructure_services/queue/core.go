@@ -8,10 +8,10 @@ import (
 	"github.com/wagslane/go-rabbitmq"
 	"go.uber.org/zap"
 
-	"social-network/internal/clients/rabbit"
-	"social-network/internal/infrastructure_services/cache"
-	"social-network/internal/model"
-	"social-network/internal/service/friend"
+	"github.com/syth0le/social-network/internal/clients/rabbit"
+	"github.com/syth0le/social-network/internal/infrastructure_services/cache"
+	"github.com/syth0le/social-network/internal/model"
+	"github.com/syth0le/social-network/internal/service/friend"
 )
 
 type ConsumerService struct {

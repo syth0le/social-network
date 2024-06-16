@@ -7,8 +7,8 @@ import (
 	xerrors "github.com/syth0le/gopnik/errors"
 	"go.uber.org/zap"
 
-	"social-network/internal/clients/redis"
-	"social-network/internal/model"
+	"github.com/syth0le/social-network/internal/clients/redis"
+	"github.com/syth0le/social-network/internal/model"
 )
 
 const (

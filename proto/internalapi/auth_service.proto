@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package social_network.internalapi;
+
+option go_package = "github.com/syth0le/social-network/proto/internalapi";
+
+service AuthService {
+  rpc ValidateToken(ValidateTokenRequest) returns (google.protobuf.Empty) {}
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+}

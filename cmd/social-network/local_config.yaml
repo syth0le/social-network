@@ -13,6 +13,11 @@ admin_server:
   endpoint: "localhost"
   port: 8081
 
+internal_grpc_server:
+  port: 7070
+  enable_reflection: true
+  enable_recover: true
+
 storage:
   hosts:
     - "master"

@@ -1,4 +1,4 @@
-module social-network
+module github.com/syth0le/social-network
 
 go 1.21.3
 

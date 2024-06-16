@@ -10,8 +10,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"social-network/internal/model"
-	"social-network/internal/service/user"
+	"github.com/syth0le/social-network/internal/model"
+	"github.com/syth0le/social-network/internal/service/user"
 )
 
 type jwtTokenResponse struct {

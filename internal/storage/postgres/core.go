@@ -7,7 +7,7 @@ import (
 	xstorage "github.com/syth0le/gopnik/db/postgres"
 	"go.uber.org/zap"
 
-	"social-network/internal/storage"
+	"github.com/syth0le/social-network/internal/storage"
 )
 
 type Storage struct {
@@ -53,5 +53,5 @@ func (s *Storage) Slave() sqlx.ExtContext {
 }
 
 func (s *Storage) now() {
-	//TODO: implement
+	// TODO: implement
 }

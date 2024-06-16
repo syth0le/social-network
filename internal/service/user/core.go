@@ -7,10 +7,10 @@ import (
 
 	xerrors "github.com/syth0le/gopnik/errors"
 
-	"social-network/internal/model"
-	"social-network/internal/storage"
-	"social-network/internal/token"
-	"social-network/internal/utils"
+	"github.com/syth0le/social-network/internal/model"
+	"github.com/syth0le/social-network/internal/storage"
+	"github.com/syth0le/social-network/internal/token"
+	"github.com/syth0le/social-network/internal/utils"
 )
 
 type Service interface {
@@ -32,7 +32,7 @@ type LoginParams struct {
 }
 
 func (s *ServiceImpl) Login(ctx context.Context, params *LoginParams) (*model.Token, error) {
-	//TODO: make atomic transaction
+	// TODO: make atomic transaction
 	user, err := s.Storage.User().GetUserByLogin(ctx, &model.UserLogin{
 		Username: params.Username,
 	})

@@ -7,11 +7,11 @@ import (
 
 	"go.uber.org/zap"
 
-	"social-network/internal/infrastructure_services/cache"
-	"social-network/internal/infrastructure_services/queue"
-	"social-network/internal/model"
-	"social-network/internal/storage"
-	"social-network/internal/utils"
+	"github.com/syth0le/social-network/internal/infrastructure_services/cache"
+	"github.com/syth0le/social-network/internal/infrastructure_services/queue"
+	"github.com/syth0le/social-network/internal/model"
+	"github.com/syth0le/social-network/internal/storage"
+	"github.com/syth0le/social-network/internal/utils"
 )
 
 type Service interface {

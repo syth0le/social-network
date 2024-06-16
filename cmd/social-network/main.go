@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"social-network/cmd/social-network/application"
-	"social-network/cmd/social-network/configuration"
+	"github.com/syth0le/social-network/cmd/social-network/application"
+	"github.com/syth0le/social-network/cmd/social-network/configuration"
 
 	xlogger "github.com/syth0le/gopnik/logger"
 

@@ -7,18 +7,18 @@ import (
 
 	"go.uber.org/zap"
 
-	"social-network/cmd/social-network/configuration"
-	"social-network/internal/authentication"
-	"social-network/internal/clients/rabbit"
-	"social-network/internal/clients/redis"
-	"social-network/internal/infrastructure_services/cache"
-	"social-network/internal/infrastructure_services/heater"
-	"social-network/internal/infrastructure_services/queue"
-	"social-network/internal/service/friend"
-	"social-network/internal/service/post"
-	"social-network/internal/service/user"
-	"social-network/internal/storage/postgres"
-	"social-network/internal/token"
+	"github.com/syth0le/social-network/cmd/social-network/configuration"
+	"github.com/syth0le/social-network/internal/authentication"
+	"github.com/syth0le/social-network/internal/clients/rabbit"
+	"github.com/syth0le/social-network/internal/clients/redis"
+	"github.com/syth0le/social-network/internal/infrastructure_services/cache"
+	"github.com/syth0le/social-network/internal/infrastructure_services/heater"
+	"github.com/syth0le/social-network/internal/infrastructure_services/queue"
+	"github.com/syth0le/social-network/internal/service/friend"
+	"github.com/syth0le/social-network/internal/service/post"
+	"github.com/syth0le/social-network/internal/service/user"
+	"github.com/syth0le/social-network/internal/storage/postgres"
+	"github.com/syth0le/social-network/internal/token"
 
 	xcloser "github.com/syth0le/gopnik/closer"
 )
@@ -49,6 +49,12 @@ func (a *App) Run() error {
 		return fmt.Errorf("construct env: %w", err)
 	}
 
+	internalGRPCServer := a.newInternalGRPCServer(envStruct)
+	a.Closer.AddForce(internalGRPCServer.ForcefullyStop)
+	a.Closer.Add(internalGRPCServer.GracefullyStop)
+
+	a.Closer.Run(internalGRPCServer.Run)
+
 	httpServer := a.newHTTPServer(envStruct)
 	a.Closer.Add(httpServer.GracefulStop()...)
 
@@ -72,19 +78,9 @@ func (a *App) constructEnv(ctx context.Context) (*env, error) {
 	a.Closer.Add(postgresDB.Close)
 
 	redisClient := redis.NewRedisClient(a.Logger, a.Config.Cache) // TODO: move to gopnik
-	if err != nil {
-		return nil, fmt.Errorf("new redis client: %w", err)
-	}
 	a.Closer.Add(redisClient.Close)
 
 	cacheService := &cache.ServiceImpl{Client: redisClient, Logger: a.Logger}
-
-	// redisDB, err := kafka.NewProducer(a.Logger, a.Config.Storage) // TODO: move to gopnik
-	// kafkaConsumer := clients.NewKafkaConsumer(a.Logger, a.Config.Redis)
-	// if err != nil {
-	//	return nil, fmt.Errorf("new redis client: %w", err)
-	// }
-	// a.Closer.Add(kafkaConsumer.Close)
 
 	publisher, err := rabbit.NewRabbitPublisher(a.Logger, a.Config.Queue) // TODO: move to gopnik
 	if err != nil {

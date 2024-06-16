@@ -12,9 +12,9 @@ import (
 
 	"github.com/go-http-utils/headers"
 
-	"social-network/internal/service/friend"
-	"social-network/internal/service/post"
-	"social-network/internal/service/user"
+	"github.com/syth0le/social-network/internal/service/friend"
+	"github.com/syth0le/social-network/internal/service/post"
+	"github.com/syth0le/social-network/internal/service/user"
 )
 
 type Handler struct {

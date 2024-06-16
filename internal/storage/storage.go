@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"social-network/internal/model"
+	"github.com/syth0le/social-network/internal/model"
 )
 
 type Storage interface {

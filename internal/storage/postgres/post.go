@@ -9,7 +9,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	xerrors "github.com/syth0le/gopnik/errors"
 
-	"social-network/internal/model"
+	"github.com/syth0le/social-network/internal/model"
 )
 
 func (s *Storage) Create(ctx context.Context, params *model.CreatePostParams) (*model.Post, error) {

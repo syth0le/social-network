@@ -9,8 +9,8 @@ import (
 	xlogger "github.com/syth0le/gopnik/logger"
 	"go.uber.org/zap"
 
-	"social-network/cmd/users-generator/application"
-	"social-network/cmd/users-generator/configuration"
+	"github.com/syth0le/social-network/cmd/users-generator/application"
+	"github.com/syth0le/social-network/cmd/users-generator/configuration"
 )
 
 func main() {

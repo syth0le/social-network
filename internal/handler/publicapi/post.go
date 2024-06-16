@@ -6,9 +6,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"social-network/internal/authentication"
-	"social-network/internal/model"
-	"social-network/internal/service/post"
+	"github.com/syth0le/social-network/internal/authentication"
+	"github.com/syth0le/social-network/internal/model"
+	"github.com/syth0le/social-network/internal/service/post"
 )
 
 type createPostRequest struct {

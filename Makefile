@@ -31,6 +31,8 @@ migrate-pgmigrate:
 generate-users:
 	cd cmd/users-generator && go build && ./users-generator --config=local_config.yaml
 
+proto:
+	protoc -I proto --go_out=proto --go_opt=paths=source_relative --go-grpc_out=proto --go-grpc_opt=paths=source_relative proto/internalapi/auth_service.proto --go-grpc_out=require_unimplemented_servers=false:.
 
 #echo 'GET http://localhost:8080/user/search?first_name=na&second_name=na' | \                                                                                                                                          [±main ●]
 #    vegeta attack -rate 5000 -duration 10s | vegeta encode | \

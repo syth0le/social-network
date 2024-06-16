@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"social-network/cmd/social-network/configuration"
-	"social-network/internal/model"
-	"social-network/internal/utils"
+	xerrors "github.com/syth0le/gopnik/errors"
+
+	"github.com/syth0le/social-network/cmd/social-network/configuration"
+	"github.com/syth0le/social-network/internal/model"
+	"github.com/syth0le/social-network/internal/utils"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -60,7 +62,7 @@ func (m *Manager) ValidateToken(tokenString string) (model.UserID, error) {
 
 	id, ok := claimsMap["uid"]
 	if !ok {
-		return "", fmt.Errorf("not found uid")
+		return "", xerrors.WrapForbiddenError(fmt.Errorf("not found uid"), "parse token error")
 	}
 
 	return model.UserID(id.(string)), nil
@@ -75,14 +77,14 @@ func (m *Manager) parseToken(tokenString string) (jwt.MapClaims, error) {
 		return m.saltValue, nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("parsing token err: %w", err)
+		return nil, xerrors.WrapForbiddenError(fmt.Errorf("parsing token err: %w", err), "parse token error")
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		return claims, nil
 	}
 
-	return nil, fmt.Errorf("parsing token err")
+	return nil, xerrors.WrapForbiddenError(fmt.Errorf("claims token err or token is not valid"), "parse token error")
 }
 
 func (m *Manager) getExpirationDate() time.Time {

@@ -7,9 +7,9 @@ import (
 
 	"go.uber.org/zap"
 
-	"social-network/internal/infrastructure_services/cache"
-	"social-network/internal/service/friend"
-	"social-network/internal/service/post"
+	"github.com/syth0le/social-network/internal/infrastructure_services/cache"
+	"github.com/syth0le/social-network/internal/service/friend"
+	"github.com/syth0le/social-network/internal/service/post"
 )
 
 type HeaterService struct {

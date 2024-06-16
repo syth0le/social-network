@@ -3,7 +3,7 @@ package application
 import (
 	xservers "github.com/syth0le/gopnik/servers"
 
-	"social-network/internal/handler/publicapi"
+	"github.com/syth0le/social-network/internal/handler/publicapi"
 
 	"github.com/go-chi/chi/v5"
 )

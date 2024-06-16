@@ -2,12 +2,13 @@ package authentication
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"go.uber.org/zap"
 
-	"social-network/internal/service/user"
-	"social-network/internal/token"
+	"github.com/syth0le/social-network/internal/service/user"
+	"github.com/syth0le/social-network/internal/token"
 )
 
 const authHeader = "Authorization"
@@ -19,7 +20,7 @@ type Service struct {
 	TokenManager *token.Manager
 }
 
-func (s Service) AuthenticationInterceptor(next http.Handler) http.Handler {
+func (s *Service) AuthenticationInterceptor(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authToken := r.Header.Get(authHeader)
 
@@ -35,4 +36,13 @@ func (s Service) AuthenticationInterceptor(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), UserIDValue, userID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func (s *Service) ValidateToken(authToken string) error {
+	_, err := s.TokenManager.ValidateToken(authToken)
+	if err != nil {
+		return fmt.Errorf("validate token: %w", err)
+	}
+
+	return nil
 }
