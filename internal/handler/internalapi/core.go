@@ -8,7 +8,6 @@ import (
 	xerrors "github.com/syth0le/gopnik/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/syth0le/social-network/internal/authentication"
 	"github.com/syth0le/social-network/proto/internalapi"
@@ -20,13 +19,13 @@ type AuthHandler struct {
 	AuthService authentication.Service
 }
 
-func (h *AuthHandler) ValidateToken(ctx context.Context, request *internalapi.ValidateTokenRequest) (*emptypb.Empty, error) {
-	err := h.AuthService.ValidateToken(request.Token)
+func (h *AuthHandler) ValidateToken(ctx context.Context, request *internalapi.ValidateTokenRequest) (*internalapi.ValidateTokenResponse, error) {
+	userID, err := h.AuthService.ValidateToken(request.Token)
 	if err != nil {
 		return nil, GRPCError(fmt.Errorf("validate token: %w", err))
 	}
 
-	return &emptypb.Empty{}, nil
+	return &internalapi.ValidateTokenResponse{UserId: userID.String()}, nil
 }
 
 // GRPCError todo: move to gopnik and create server interceptor

@@ -27,6 +27,7 @@ services:
       - .:/usr/src/app
     networks:
       - mynet
+      - realtime-notification-service_notifications_net
   master:
     image: postgres:latest
     container_name: "master"
@@ -133,3 +134,5 @@ networks:
       driver: default
       config:
         - subnet: 172.16.1.0/24
+  realtime-notification-service_notifications_net:
+    external: true

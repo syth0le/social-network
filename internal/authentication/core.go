@@ -10,6 +10,7 @@ import (
 	xerrors "github.com/syth0le/gopnik/errors"
 	"go.uber.org/zap"
 
+	"github.com/syth0le/social-network/internal/model"
 	"github.com/syth0le/social-network/internal/service/user"
 	"github.com/syth0le/social-network/internal/token"
 )
@@ -41,13 +42,13 @@ func (s *Service) AuthenticationInterceptor(next http.Handler) http.Handler {
 	})
 }
 
-func (s *Service) ValidateToken(authToken string) error {
-	_, err := s.TokenManager.ValidateToken(authToken)
+func (s *Service) ValidateToken(authToken string) (model.UserID, error) {
+	userID, err := s.TokenManager.ValidateToken(authToken)
 	if err != nil {
-		return fmt.Errorf("validate token: %w", err)
+		return "", fmt.Errorf("validate token: %w", err)
 	}
 
-	return nil
+	return userID, nil
 }
 
 func (s *Service) writeError(w http.ResponseWriter, err error) {
