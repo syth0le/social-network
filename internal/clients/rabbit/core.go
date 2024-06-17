@@ -12,14 +12,13 @@ import (
 const defaultContentType = "application/json"
 
 type Publisher interface {
-	Publish(msg []byte) error
+	Publish(msg []byte, routingKey string, withExpiration bool) error
 	Close() error
 }
 
 type PublisherImpl struct {
 	Conn         *rabbitmq.Conn
 	Publisher    *rabbitmq.Publisher
-	RoutingKey   string
 	ExchangeName string
 }
 
@@ -51,7 +50,6 @@ func NewRabbitPublisher(logger *zap.Logger, cfg configuration.RabbitConfig) (Pub
 	return &PublisherImpl{
 		Conn:         conn,
 		Publisher:    publisher,
-		RoutingKey:   cfg.RoutingKey,
 		ExchangeName: cfg.ExchangeName,
 	}, nil
 }
@@ -61,12 +59,19 @@ func (p *PublisherImpl) Close() error {
 	return p.Conn.Close()
 }
 
-func (p *PublisherImpl) Publish(msg []byte) error {
-	return p.Publisher.Publish(
-		msg,
-		[]string{p.RoutingKey},
+func (p *PublisherImpl) Publish(msg []byte, routingKey string, withExpiration bool) error {
+	optionFuncs := []func(*rabbitmq.PublishOptions){
 		rabbitmq.WithPublishOptionsContentType(defaultContentType),
 		rabbitmq.WithPublishOptionsExchange(p.ExchangeName),
+	}
+	if withExpiration {
+		optionFuncs = append(optionFuncs, rabbitmq.WithPublishOptionsExpiration("5000"))
+	}
+
+	return p.Publisher.Publish(
+		msg,
+		[]string{routingKey},
+		optionFuncs...,
 	)
 }
 
@@ -80,7 +85,7 @@ type ConsumerImpl struct {
 	Consumer *rabbitmq.Consumer
 }
 
-func NewRabbitConsumer(logger *zap.Logger, cfg configuration.RabbitConfig) (Consumer, error) {
+func NewRabbitConsumer(logger *zap.Logger, cfg configuration.RabbitConfig, routingKey string) (Consumer, error) {
 	if !cfg.Enable {
 		return &ConsumerMock{
 			Logger: logger,
@@ -98,7 +103,7 @@ func NewRabbitConsumer(logger *zap.Logger, cfg configuration.RabbitConfig) (Cons
 	consumer, err := rabbitmq.NewConsumer(
 		conn,
 		cfg.QueueName,
-		rabbitmq.WithConsumerOptionsRoutingKey(cfg.RoutingKey),
+		rabbitmq.WithConsumerOptionsRoutingKey(routingKey),
 		rabbitmq.WithConsumerOptionsExchangeName(cfg.ExchangeName),
 		rabbitmq.WithConsumerOptionsExchangeDeclare,
 	)

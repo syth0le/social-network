@@ -9,8 +9,8 @@ type PublisherMock struct {
 	Logger *zap.Logger
 }
 
-func (m *PublisherMock) Publish(msg []byte) error {
-	m.Logger.Sugar().Debugf("published through publisher mock: %b", msg)
+func (m *PublisherMock) Publish(msg []byte, routingKey string, withExpiration bool) error {
+	m.Logger.Sugar().Debugf("published through publisher mock: %b - %s", msg, routingKey)
 	return nil
 }
 

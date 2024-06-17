@@ -17,6 +17,7 @@ type Config struct {
 	Storage            xstorage.StorageConfig    `yaml:"storage"`
 	Cache              RedisConfig               `yaml:"cache"`
 	Queue              RabbitConfig              `yaml:"queue"`
+	NotificationsQueue RabbitConfig              `yaml:"notifications_queue"`
 }
 
 func (c *Config) Validate() error {
@@ -48,6 +49,5 @@ type RabbitConfig struct {
 	Enable       bool   `yaml:"enable"`
 	Address      string `yaml:"address"`
 	QueueName    string `yaml:"queue_name"`
-	RoutingKey   string `yaml:"routing_key"`
 	ExchangeName string `yaml:"exchange_name"`
 }

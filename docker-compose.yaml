@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   backend:
-    container_name: "app"
+    container_name: "social-network"
     build:
       context: .
     command: "/usr/local/bin/social-network --config=/usr/src/app/cmd/social-network/local_config.yaml"
@@ -26,8 +26,10 @@ services:
     volumes:
       - .:/usr/src/app
     networks:
-      - mynet
+      - social_network_net
       - realtime-notification-service_notifications_net
+    external_links:
+      - notifications-broker:notifications-broker
   master:
     image: postgres:latest
     container_name: "master"
@@ -50,13 +52,13 @@ services:
       start_period: 10s
     restart: always
     networks:
-      - mynet
+      - social_network_net
   migrate:
     image: migrate/migrate
     container_name: "migrate"
     command: ["-path", "/migrations", "-database",  "postgresql://social-network-local-admin:eephayl3eaph8Xo@master:5432/social-network-local?sslmode=disable", "up"]
     networks:
-      - mynet
+      - social_network_net
     depends_on:
       master:
         condition: service_healthy # needful setting which wait available postgres host
@@ -101,7 +103,7 @@ services:
     volumes:
       - redis-cache-data:/data
     networks:
-      - mynet
+      - social_network_net
   message-broker:
     image: rabbitmq:3-management-alpine
     container_name: message-broker
@@ -113,7 +115,7 @@ services:
       - message-broker-data-log:/var/log/rabbitmq
     restart: always
     networks:
-      - mynet
+      - social_network_net
     healthcheck:
       test: [ "CMD", "rabbitmqctl", "status" ]
       interval: 5s
@@ -128,7 +130,7 @@ volumes:
   message-broker-data-log:
 
 networks:
-  mynet:
+  social_network_net:
     driver: bridge
     ipam:
       driver: default

@@ -23,6 +23,10 @@ import (
 	xcloser "github.com/syth0le/gopnik/closer"
 )
 
+const (
+	defaultRoutingKey = "snw-routing-key"
+)
+
 type App struct {
 	Config *configuration.Config
 	Logger *zap.Logger
@@ -88,7 +92,7 @@ func (a *App) constructEnv(ctx context.Context) (*env, error) {
 	}
 	a.Closer.Add(publisher.Close)
 
-	consumer, err := rabbit.NewRabbitConsumer(a.Logger, a.Config.Queue) // TODO: move to gopnik
+	consumer, err := rabbit.NewRabbitConsumer(a.Logger, a.Config.Queue, defaultRoutingKey) // TODO: move to gopnik
 	if err != nil {
 		return nil, fmt.Errorf("new rabbit consumer: %w", err)
 	}
@@ -103,8 +107,20 @@ func (a *App) constructEnv(ctx context.Context) (*env, error) {
 	friendService := &friend.ServiceImpl{Storage: postgresDB}
 
 	producerService := &queue.ProducerService{
+		Logger:     a.Logger,
+		Producer:   publisher,
+		RoutingKey: defaultRoutingKey,
+	}
+
+	notificationPublisher, err := rabbit.NewRabbitPublisher(a.Logger, a.Config.NotificationsQueue) // TODO: move to gopnik
+	if err != nil {
+		return nil, fmt.Errorf("new rabbit notification publisher: %w", err)
+	}
+	a.Closer.Add(notificationPublisher.Close)
+
+	notificationService := &queue.NotificationService{
+		Producer: notificationPublisher,
 		Logger:   a.Logger,
-		Producer: publisher,
 	}
 
 	postService := &post.ServiceImpl{
@@ -115,10 +131,11 @@ func (a *App) constructEnv(ctx context.Context) (*env, error) {
 	}
 
 	consumerService := queue.ConsumerService{
-		Logger:        a.Logger,
-		Consumer:      consumer,
-		FriendService: friendService,
-		CacheService:  cacheService,
+		Logger:              a.Logger,
+		Consumer:            consumer,
+		FriendService:       friendService,
+		CacheService:        cacheService,
+		NotificationService: notificationService,
 	}
 	a.Closer.Run(consumerService.Run)
 

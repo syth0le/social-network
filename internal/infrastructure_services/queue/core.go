@@ -15,10 +15,11 @@ import (
 )
 
 type ConsumerService struct {
-	Consumer      rabbit.Consumer
-	Logger        *zap.Logger
-	FriendService friend.Service
-	CacheService  cache.Service
+	Consumer            rabbit.Consumer
+	Logger              *zap.Logger
+	FriendService       friend.Service
+	CacheService        cache.Service
+	NotificationService *NotificationService
 }
 
 func (s *ConsumerService) CreateFeed(ctx context.Context, post *model.Post) error {
@@ -31,6 +32,11 @@ func (s *ConsumerService) CreateFeed(ctx context.Context, post *model.Post) erro
 		err := s.CacheService.AddPostForUser(ctx, user.UserID, post) // TODO: make create tasks for ranges (1-10)
 		if err != nil {
 			return fmt.Errorf("add post for user to cache: %w", err)
+		}
+
+		err = s.NotificationService.PublishNotification(post, user.UserID.String())
+		if err != nil {
+			return fmt.Errorf("publish notification: %w", err)
 		}
 	}
 
@@ -111,8 +117,9 @@ func (s *ConsumerService) Run() error {
 }
 
 type ProducerService struct {
-	Producer rabbit.Publisher
-	Logger   *zap.Logger
+	Producer   rabbit.Publisher
+	Logger     *zap.Logger
+	RoutingKey string
 }
 
 func (s *ProducerService) CreateFeed(post *model.Post) error {
@@ -133,7 +140,26 @@ func (s *ProducerService) makeFeed(post *model.Post, action model.Action) error 
 		return fmt.Errorf("marshal binary: %w", err)
 	}
 
-	err = s.Producer.Publish(binary)
+	err = s.Producer.Publish(binary, s.RoutingKey, false)
+	if err != nil {
+		return fmt.Errorf("producer publish: %w", err)
+	}
+
+	return nil
+}
+
+type NotificationService struct {
+	Producer rabbit.Publisher
+	Logger   *zap.Logger
+}
+
+func (s *NotificationService) PublishNotification(post *model.Post, routingKey string) error {
+	binary, err := post.MarshalBinary()
+	if err != nil {
+		return fmt.Errorf("marshal binary: %w", err)
+	}
+
+	err = s.Producer.Publish(binary, routingKey, true)
 	if err != nil {
 		return fmt.Errorf("producer publish: %w", err)
 	}

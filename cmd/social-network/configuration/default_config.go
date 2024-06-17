@@ -66,7 +66,12 @@ func NewDefaultConfig() *Config {
 			Enable:       false,
 			Address:      "",
 			QueueName:    "",
-			RoutingKey:   "",
+			ExchangeName: "",
+		},
+		NotificationsQueue: RabbitConfig{
+			Enable:       false,
+			Address:      "",
+			QueueName:    "",
 			ExchangeName: "",
 		},
 	}

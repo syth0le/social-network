@@ -19,6 +19,7 @@ type AuthHandler struct {
 	AuthService authentication.Service
 }
 
+// todo: validate token raise 400 instead of 403
 func (h *AuthHandler) ValidateToken(ctx context.Context, request *internalapi.ValidateTokenRequest) (*internalapi.ValidateTokenResponse, error) {
 	userID, err := h.AuthService.ValidateToken(request.Token)
 	if err != nil {
