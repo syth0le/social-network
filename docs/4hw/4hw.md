@@ -38,4 +38,4 @@ TODO:
 - добавить в друзья пользователя-2, делая запрос от лица 1‑го пользователя.
 - создать несколько постов от обоих пользователей.
 - дернуть ручку `/post/feed` и проверить для каждого пользователя, что у них формируется лента новостей.
-- все необходимые ручки есть в [постман коллекции](https://otus.ru/redirect/?to=https%3A%2F%2Fwww.postman.com%2Faerospace-cosmonaut-29691174%2Fworkspace%2Fhighload-architect%2Fcollection%2F33337980-46a4c50d-5b28-4566-87dd-57e178216abd%3Faction%3Dshare%26creator%3D33337980)
+- все необходимые ручки есть в [постман коллекции](https://www.postman.com/aerospace-cosmonaut-29691174/workspace/highload-architect/collection/33337980-46a4c50d-5b28-4566-87dd-57e178216abd?action=share&creator=33337980)
