@@ -54,6 +54,8 @@ func constructLogger(cfg xlogger.LoggerConfig) (*zap.Logger, error) {
 	default:
 		return nil, fmt.Errorf("unexpected environment for logger: %w", err)
 	}
+	logger = logger.With(zap.String("env", string(cfg.Environment)))
+	// todo logger with geo, app_name and env
 
 	defer logger.Sync()
 	return logger, nil

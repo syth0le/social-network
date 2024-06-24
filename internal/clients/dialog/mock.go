@@ -1,12 +1,12 @@
-package auth
+package dialog
 
 import (
 	"context"
-	"net/http"
+	"fmt"
 
 	"go.uber.org/zap"
 
-	"github.com/syth0le/dialog-service/internal/model"
+	"github.com/syth0le/social-network/internal/model"
 )
 
 type ClientMock struct {
@@ -19,10 +19,14 @@ func NewClientMock(logger *zap.Logger) *ClientMock {
 	}
 }
 
-func (m *ClientMock) AuthenticationInterceptor(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		m.logger.Debug("authenticated through mock service")
-		ctx := context.WithValue(r.Context(), UserIDValue, model.UserID("mock_user"))
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+func (c ClientMock) CreateDialog(ctx context.Context, userId model.UserID, participants []model.UserID) (*model.Dialog, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (c ClientMock) CreateMessage(ctx context.Context, dialogID model.DialogID, senderID model.UserID, text string) error {
+	return fmt.Errorf("not implemented")
+}
+
+func (c ClientMock) GetDialogMessages(ctx context.Context, dialogID model.DialogID, userID model.UserID) ([]*model.Message, error) {
+	return nil, fmt.Errorf("not implemented")
 }

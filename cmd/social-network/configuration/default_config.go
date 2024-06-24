@@ -3,6 +3,7 @@ package configuration
 import (
 	"time"
 
+	xclients "github.com/syth0le/gopnik/clients"
 	xstorage "github.com/syth0le/gopnik/db/postgres"
 	xlogger "github.com/syth0le/gopnik/logger"
 	xservers "github.com/syth0le/gopnik/servers"
@@ -73,6 +74,17 @@ func NewDefaultConfig() *Config {
 			Address:      "",
 			QueueName:    "",
 			ExchangeName: "",
+		},
+		DialogClient: DialogClientConfig{
+			Enable: false,
+			Conn: xclients.GRPCClientConnConfig{
+				Endpoint:              "",
+				UserAgent:             defaultAppName,
+				MaxRetries:            0,
+				TimeoutBetweenRetries: 0,
+				InitTimeout:           0,
+				EnableCompressor:      false,
+			},
 		},
 	}
 }

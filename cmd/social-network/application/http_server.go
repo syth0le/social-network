@@ -24,6 +24,7 @@ func (a *App) publicMux(env *env) *chi.Mux {
 		UserService:   env.userService,
 		PostService:   env.postService,
 		FriendService: env.friendService,
+		DialogClient:  env.dialogClient,
 	}
 
 	mux.Post("/login", handler.Login)
@@ -51,6 +52,14 @@ func (a *App) publicMux(env *env) *chi.Mux {
 		r.Delete("/{postID}", handler.DeletePost)
 
 		r.Get("/feed", handler.GetFeed)
+	})
+
+	mux.Route("/dialog", func(r chi.Router) {
+		r.Use(env.authenticationService.AuthenticationInterceptor)
+
+		r.Post("/", handler.CreateDialog) // todo: make group dialogs
+		r.Post("/send", handler.CreateMessage)
+		r.Get("/{dialogID}/list", handler.GetDialogMessages)
 	})
 
 	return mux

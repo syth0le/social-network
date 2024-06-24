@@ -28,8 +28,10 @@ services:
     networks:
       - social_network_net
       - realtime-notification-service_notifications_net
+      - dialog-service_dialog_net
     external_links:
       - notifications-broker:notifications-broker
+      - backend:backend
   master:
     image: postgres:latest
     container_name: "master"
@@ -137,4 +139,6 @@ networks:
       config:
         - subnet: 172.16.1.0/24
   realtime-notification-service_notifications_net:
+    external: true
+  dialog-service_dialog_net:
     external: true

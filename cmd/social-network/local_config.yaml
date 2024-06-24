@@ -2,6 +2,7 @@ logger:
   level: "debug"
   encoding: "console"
   path: "stdout"
+  environment: "prod"
 
 public_server:
   enable: true
@@ -48,3 +49,8 @@ notifications_queue:
   address: "amqp://guest:guest@notifications-broker:5672"
   queue_name: "notifications-queue"
   exchange_name: "events"
+
+dialog:
+  enable: true
+  conn:
+    endpoint: dialog-service:7050

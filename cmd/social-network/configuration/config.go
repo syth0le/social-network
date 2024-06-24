@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	xclients "github.com/syth0le/gopnik/clients"
 	xstorage "github.com/syth0le/gopnik/db/postgres"
 	xlogger "github.com/syth0le/gopnik/logger"
 	xservers "github.com/syth0le/gopnik/servers"
@@ -18,6 +19,7 @@ type Config struct {
 	Cache              RedisConfig               `yaml:"cache"`
 	Queue              RabbitConfig              `yaml:"queue"`
 	NotificationsQueue RabbitConfig              `yaml:"notifications_queue"`
+	DialogClient       DialogClientConfig        `yaml:"dialog"`
 }
 
 func (c *Config) Validate() error {
@@ -50,4 +52,17 @@ type RabbitConfig struct {
 	Address      string `yaml:"address"`
 	QueueName    string `yaml:"queue_name"`
 	ExchangeName string `yaml:"exchange_name"`
+}
+
+type DialogClientConfig struct {
+	Enable bool                          `yaml:"enable"`
+	Conn   xclients.GRPCClientConnConfig `yaml:"conn"`
+}
+
+func (c *DialogClientConfig) Validate() error {
+	if !c.Enable {
+		return nil
+	}
+
+	return nil // todo
 }

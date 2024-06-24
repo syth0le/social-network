@@ -1,92 +1,86 @@
-package auth
+package dialog
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"net/http"
 
-	"github.com/go-http-utils/headers"
-	xerrors "github.com/syth0le/gopnik/errors"
-	inpb "github.com/syth0le/social-network/proto/internalapi"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
-	"github.com/syth0le/dialog-service/internal/model"
+	inpb "github.com/syth0le/dialog-service/proto/internalapi"
+
+	"github.com/syth0le/social-network/internal/model"
 )
 
-const authHeader = "Authorization"
-const UserIDValue = "userID"
-
 type Client interface {
-	AuthenticationInterceptor(next http.Handler) http.Handler
+	CreateDialog(ctx context.Context, userId model.UserID, participants []model.UserID) (*model.Dialog, error)
+	CreateMessage(ctx context.Context, dialogID model.DialogID, senderID model.UserID, text string) error
+	GetDialogMessages(ctx context.Context, dialogID model.DialogID, userID model.UserID) ([]*model.Message, error)
 }
 
 type ClientImpl struct {
 	logger *zap.Logger
-	client inpb.AuthServiceClient
+	client inpb.DialogServiceClient
 }
 
-func NewAuthImpl(logger *zap.Logger, conn *grpc.ClientConn) *ClientImpl {
+func NewClientImpl(logger *zap.Logger, conn *grpc.ClientConn) *ClientImpl {
 	return &ClientImpl{
 		logger: logger,
-		client: inpb.NewAuthServiceClient(conn),
+		client: inpb.NewDialogServiceClient(conn),
 	}
 }
 
-func (c *ClientImpl) AuthenticationInterceptor(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		authToken := r.Header.Get(authHeader)
+func (c *ClientImpl) CreateDialog(ctx context.Context, userId model.UserID, participants []model.UserID) (*model.Dialog, error) {
+	participantsIDs := make([]string, len(participants))
+	for idx, item := range participants {
+		participantsIDs[idx] = item.String()
+	}
 
-		resp, err := c.client.ValidateToken(r.Context(), &inpb.ValidateTokenRequest{Token: authToken})
-		if err != nil {
-			c.writeError(w, xerrors.WrapForbiddenError(fmt.Errorf("validate token: %w", err), "token validation failed"))
-			return
-		}
-
-		ctx := context.WithValue(r.Context(), UserIDValue, model.UserID(resp.UserId))
-		next.ServeHTTP(w, r.WithContext(ctx))
+	dialog, err := c.client.CreateDialog(ctx, &inpb.CreateDialogRequest{
+		UserId:          userId.String(),
+		ParticipantsIds: participantsIDs,
 	})
+	if err != nil {
+		return nil, fmt.Errorf("create dialog: %w", err)
+	}
+
+	return &model.Dialog{
+		ID:              model.DialogID(dialog.DialogId),
+		ParticipantsIDs: participants,
+	}, nil
 }
 
-func (c *ClientImpl) writeError(w http.ResponseWriter, err error) {
-	c.logger.Sugar().Warnf("http response error: %v", err)
-
-	w.Header().Set(headers.ContentType, "application/json")
-	errorResult, ok := xerrors.FromError(err)
-	if !ok {
-		c.logger.Sugar().Errorf("cannot write log message: %v", err)
-		return
-	}
-	w.WriteHeader(errorResult.StatusCode)
-	err = json.NewEncoder(w).Encode(
-		map[string]any{
-			"message": errorResult.Msg,
-			"code":    errorResult.StatusCode,
-		})
-
+func (c *ClientImpl) CreateMessage(ctx context.Context, dialogID model.DialogID, senderID model.UserID, text string) error {
+	_, err := c.client.CreateMessage(ctx, &inpb.CreateMessageRequest{
+		DialogId: dialogID.String(),
+		SenderId: senderID.String(),
+		Text:     text,
+	})
 	if err != nil {
-		http.Error(w, xerrors.InternalErrorMessage, http.StatusInternalServerError) // TODO: make error mapping
+		return fmt.Errorf("create message: %w", err)
 	}
+
+	return nil
 }
 
-func (c *ClientImpl) writeGRPCError(w http.ResponseWriter, err error) {
-	c.logger.Sugar().Warnf("http response error: %v", err)
-
-	w.Header().Set(headers.ContentType, "application/json")
-	errorResult, ok := xerrors.FromError(err)
-	if !ok {
-		c.logger.Sugar().Errorf("cannot write log message: %v", err)
-		return
-	}
-	w.WriteHeader(errorResult.StatusCode)
-	err = json.NewEncoder(w).Encode(
-		map[string]any{
-			"message": errorResult.Msg,
-			"code":    errorResult.StatusCode,
-		})
-
+func (c *ClientImpl) GetDialogMessages(ctx context.Context, dialogID model.DialogID, userID model.UserID) ([]*model.Message, error) {
+	pbMessages, err := c.client.GetDialogMessages(ctx, &inpb.GetDialogMessagesRequest{
+		DialogId: dialogID.String(),
+		UserId:   userID.String(),
+	})
 	if err != nil {
-		http.Error(w, xerrors.InternalErrorMessage, http.StatusInternalServerError) // TODO: make error mapping
+		return nil, fmt.Errorf("create message: %w", err)
 	}
+
+	messages := make([]*model.Message, len(pbMessages.Messages))
+	for idx, item := range pbMessages.Messages {
+		messages[idx] = &model.Message{
+			ID:       model.MessageID(item.Id),
+			DialogID: model.DialogID(item.DialogId),
+			SenderID: model.UserID(item.SenderId),
+			Text:     item.Text,
+		}
+	}
+
+	return messages, nil
 }

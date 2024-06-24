@@ -9,6 +9,7 @@ import (
 
 	"github.com/syth0le/social-network/cmd/social-network/configuration"
 	"github.com/syth0le/social-network/internal/authentication"
+	"github.com/syth0le/social-network/internal/clients/dialog"
 	"github.com/syth0le/social-network/internal/clients/rabbit"
 	"github.com/syth0le/social-network/internal/clients/redis"
 	"github.com/syth0le/social-network/internal/infrastructure_services/cache"
@@ -20,6 +21,7 @@ import (
 	"github.com/syth0le/social-network/internal/storage/postgres"
 	"github.com/syth0le/social-network/internal/token"
 
+	xclients "github.com/syth0le/gopnik/clients"
 	xcloser "github.com/syth0le/gopnik/closer"
 )
 
@@ -72,6 +74,9 @@ type env struct {
 	authenticationService authentication.Service
 	postService           post.Service
 	friendService         friend.Service
+
+	// todo: make service
+	dialogClient dialog.Client
 }
 
 func (a *App) constructEnv(ctx context.Context) (*env, error) {
@@ -151,6 +156,11 @@ func (a *App) constructEnv(ctx context.Context) (*env, error) {
 		return nil, fmt.Errorf("cannot heating cache: %w", err)
 	}
 
+	dialogClient, err := a.makeDialogClient(ctx, a.Config.DialogClient)
+	if err != nil {
+		return nil, fmt.Errorf("make dialog client: %w", err)
+	}
+
 	return &env{
 		userService: userService,
 		authenticationService: authentication.Service{
@@ -160,5 +170,21 @@ func (a *App) constructEnv(ctx context.Context) (*env, error) {
 		},
 		postService:   postService,
 		friendService: friendService,
+		dialogClient:  dialogClient,
 	}, nil
+}
+
+func (a *App) makeDialogClient(ctx context.Context, cfg configuration.DialogClientConfig) (dialog.Client, error) {
+	if !cfg.Enable {
+		return dialog.NewClientMock(a.Logger), nil
+	}
+
+	connection, err := xclients.NewGRPCClientConn(ctx, cfg.Conn)
+	if err != nil {
+		return nil, fmt.Errorf("new grpc conn: %w", err)
+	}
+
+	a.Closer.Add(connection.Close)
+
+	return dialog.NewClientImpl(a.Logger, connection), nil
 }

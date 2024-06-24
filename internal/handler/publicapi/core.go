@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-http-utils/headers"
 
+	"github.com/syth0le/social-network/internal/clients/dialog"
 	"github.com/syth0le/social-network/internal/service/friend"
 	"github.com/syth0le/social-network/internal/service/post"
 	"github.com/syth0le/social-network/internal/service/user"
@@ -22,6 +23,7 @@ type Handler struct {
 	UserService   user.Service
 	PostService   post.Service
 	FriendService friend.Service
+	DialogClient  dialog.Client
 }
 
 func (h *Handler) writeError(ctx context.Context, w http.ResponseWriter, err error) {
@@ -53,7 +55,7 @@ func writeResponse(w http.ResponseWriter, response any) {
 	}
 }
 
-func parseJSONRequest[T loginRequest | registerRequest | createPostRequest | updatePostRequest](r *http.Request) (*T, error) {
+func parseJSONRequest[T loginRequest | registerRequest | createPostRequest | updatePostRequest | createDialogRequest | createMessageRequest](r *http.Request) (*T, error) {
 	defer r.Body.Close()
 	body, err := io.ReadAll(r.Body)
 	if err != nil {

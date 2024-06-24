@@ -6,9 +6,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/syth0le/dialog-service/internal/clients/auth"
-	"github.com/syth0le/dialog-service/internal/model"
-	"github.com/syth0le/dialog-service/internal/service/dialog"
+	"github.com/syth0le/social-network/internal/authentication"
+	"github.com/syth0le/social-network/internal/model"
 )
 
 type createDialogRequest struct {
@@ -20,11 +19,13 @@ type dialogResponse struct {
 	ParticipantsIDs []string `json:"participants_ids"`
 }
 
+// deprecatedAPI
+
 func (h *Handler) CreateDialog(w http.ResponseWriter, r *http.Request) {
 	handleRequest := func() (*model.Dialog, error) {
 		ctx := r.Context()
 
-		userIDStr := ctx.Value(auth.UserIDValue)
+		userIDStr := ctx.Value(authentication.UserIDValue)
 		if userIDStr == "" {
 			return nil, fmt.Errorf("cannot recognize userID")
 		}
@@ -39,9 +40,7 @@ func (h *Handler) CreateDialog(w http.ResponseWriter, r *http.Request) {
 			participantsIDs[idx] = model.UserID(item)
 		}
 
-		dialogModel, err := h.DialogService.CreateDialog(ctx, &dialog.CreateDialogParams{
-			ParticipantsIDs: participantsIDs,
-		})
+		dialogModel, err := h.DialogClient.CreateDialog(ctx, userIDStr.(model.UserID), participantsIDs)
 		if err != nil {
 			return nil, fmt.Errorf("create dialog: %w", err)
 		}
@@ -67,7 +66,7 @@ func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 	handleRequest := func() error {
 		ctx := r.Context()
 
-		userIDStr := ctx.Value(auth.UserIDValue)
+		userIDStr := ctx.Value(authentication.UserIDValue)
 		if userIDStr == "" {
 			return fmt.Errorf("cannot recognize userID")
 		}
@@ -77,11 +76,7 @@ func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 			return fmt.Errorf("parse json request: %w", err)
 		}
 
-		err = h.DialogService.CreateMessage(ctx, &dialog.CreateMessageParams{
-			DialogID: model.DialogID(request.DialogID),
-			SenderID: userIDStr.(model.UserID),
-			Text:     request.Text,
-		})
+		err = h.DialogClient.CreateMessage(ctx, model.DialogID(request.DialogID), userIDStr.(model.UserID), request.Text)
 		if err != nil {
 			return fmt.Errorf("create message: %w", err)
 		}
@@ -113,17 +108,14 @@ func (h *Handler) GetDialogMessages(w http.ResponseWriter, r *http.Request) {
 	handleRequest := func() (*messageListResponse, error) {
 		ctx := r.Context()
 
-		userIDStr := ctx.Value(auth.UserIDValue)
+		userIDStr := ctx.Value(authentication.UserIDValue)
 		if userIDStr == "" {
 			return nil, fmt.Errorf("cannot recognize userID")
 		}
 
 		dialogID := chi.URLParamFromCtx(ctx, "dialogID")
 
-		messages, err := h.DialogService.GetDialogMessages(ctx, &dialog.GetDialogMessagesParams{
-			UserID:   userIDStr.(model.UserID),
-			DialogID: model.DialogID(dialogID),
-		})
+		messages, err := h.DialogClient.GetDialogMessages(ctx, model.DialogID(dialogID), userIDStr.(model.UserID))
 		if err != nil {
 			return nil, fmt.Errorf("get dialog: %w", err)
 		}
@@ -143,7 +135,7 @@ func (h *Handler) GetDialogMessages(w http.ResponseWriter, r *http.Request) {
 func dialogModelToResponse(dialog *model.Dialog) *dialogResponse {
 	participants := make([]string, len(dialog.ParticipantsIDs))
 	for idx, item := range dialog.ParticipantsIDs {
-		participants[idx] = item.UserID.String()
+		participants[idx] = item.String()
 	}
 
 	return &dialogResponse{
