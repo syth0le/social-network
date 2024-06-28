@@ -4,6 +4,9 @@ run:
 rebuild:
 	docker-compose up -d --build
 
+run-monitoring:
+	docker-compose -f docker-compose.observability.yaml up -d --build
+
 # make make-migration ARGS="name"
 make-migration:
 	migrate create -ext sql -dir migrations -seq $(ARGS)

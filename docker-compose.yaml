@@ -55,6 +55,8 @@ services:
     restart: always
     networks:
       - social_network_net
+    external_links:
+      - master-exporter:master-exporter
   migrate:
     image: migrate/migrate
     container_name: "migrate"
