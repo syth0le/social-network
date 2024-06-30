@@ -9,6 +9,7 @@ import (
 
 	"github.com/syth0le/social-network/internal/model"
 	"github.com/syth0le/social-network/internal/storage"
+	"github.com/syth0le/social-network/internal/storage/tarantool"
 	"github.com/syth0le/social-network/internal/token"
 	"github.com/syth0le/social-network/internal/utils"
 )
@@ -19,11 +20,13 @@ type Service interface {
 	GetUserByID(ctx context.Context, params *GetUserByIDParams) (*model.User, error)
 	GetUserByTokenAndID(ctx context.Context, params *GetUserByTokenAndIDParams) (*model.User, error)
 	SearchUser(ctx context.Context, params *SearchUserParams) ([]*model.User, error)
+	SearchTarantoolUser(ctx context.Context, params *SearchTarantoolUserParams) ([]model.TarantoolUser, error)
 }
 
 type ServiceImpl struct {
-	Storage      storage.Storage
-	TokenManager *token.Manager
+	Storage          storage.Storage
+	TokenManager     *token.Manager
+	TarantoolStorage *tarantool.Storage
 }
 
 type LoginParams struct {
@@ -137,6 +140,20 @@ type SearchUserParams struct {
 
 func (s *ServiceImpl) SearchUser(ctx context.Context, params *SearchUserParams) ([]*model.User, error) {
 	user, err := s.Storage.User().SearchUser(ctx, params.FirstName, params.SecondName)
+	if err != nil {
+		return nil, fmt.Errorf("search user: %w", err)
+	}
+
+	return user, nil
+}
+
+type SearchTarantoolUserParams struct {
+	FirstName  string
+	SecondName string
+}
+
+func (s *ServiceImpl) SearchTarantoolUser(ctx context.Context, params *SearchTarantoolUserParams) ([]model.TarantoolUser, error) {
+	user, err := s.TarantoolStorage.SearchUser(ctx, params.FirstName, params.SecondName)
 	if err != nil {
 		return nil, fmt.Errorf("search user: %w", err)
 	}

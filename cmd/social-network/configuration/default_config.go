@@ -86,5 +86,12 @@ func NewDefaultConfig() *Config {
 				EnableCompressor:      false,
 			},
 		},
+		Tarantool: TarantoolConfig{
+			EnableMock:      false,
+			Address:         "",
+			Username:        "",
+			Password:        "",
+			TimeoutDuration: 1 * time.Second,
+		},
 	}
 }

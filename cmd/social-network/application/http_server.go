@@ -33,6 +33,7 @@ func (a *App) publicMux(env *env) *chi.Mux {
 		r.Get("/{userID}", handler.GetUserByID)
 
 		r.Get("/search", handler.SearchUser)
+		r.Get("/search-tarantool", handler.SearchTarantoolUser)
 	})
 
 	mux.Route("/friend", func(r chi.Router) {

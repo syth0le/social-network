@@ -14,6 +14,7 @@ import (
 
 	"github.com/syth0le/social-network/internal/model"
 	"github.com/syth0le/social-network/internal/storage"
+	"github.com/syth0le/social-network/internal/storage/tarantool"
 	"github.com/syth0le/social-network/internal/utils"
 )
 
@@ -27,9 +28,10 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	Logger   *zap.Logger
-	Storage  storage.Storage
-	DataFile string
+	Logger           *zap.Logger
+	Storage          storage.Storage
+	TarantoolStorage *tarantool.Storage
+	DataFile         string
 }
 
 func (s *ServiceImpl) BatchGenerateUsers(ctx context.Context) error {
@@ -37,7 +39,7 @@ func (s *ServiceImpl) BatchGenerateUsers(ctx context.Context) error {
 	usersList := s.readUsersData()
 	var usersListForBatchCreate []*model.UserRegister
 	counter := 0
-	for _, user := range usersList {
+	for idx, user := range usersList {
 		usersListForBatchCreate = append(usersListForBatchCreate, user)
 
 		err := user.Validate()
@@ -57,6 +59,22 @@ func (s *ServiceImpl) BatchGenerateUsers(ctx context.Context) error {
 			}
 			usersListForBatchCreate = nil
 		}
+
+		resp, err := s.TarantoolStorage.AddUser(ctx, &model.TarantoolUser{
+			UserID:         strconv.Itoa(idx),
+			FirstName:      user.FirstName,
+			SecondName:     user.SecondName,
+			Username:       user.Username,
+			HashedPassword: user.HashedPassword,
+			Sex:            user.Sex,
+			Biography:      user.Biography,
+			City:           user.City,
+		})
+		if err != nil {
+			return fmt.Errorf("add tarantool user: %w", err)
+		}
+
+		s.Logger.Sugar().Debugf("added user resp: %v", resp)
 	}
 
 	if len(usersListForBatchCreate) != 0 {

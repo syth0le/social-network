@@ -20,6 +20,7 @@ type Config struct {
 	Queue              RabbitConfig              `yaml:"queue"`
 	NotificationsQueue RabbitConfig              `yaml:"notifications_queue"`
 	DialogClient       DialogClientConfig        `yaml:"dialog"`
+	Tarantool          TarantoolConfig           `yaml:"tarantool"`
 }
 
 func (c *Config) Validate() error {
@@ -61,6 +62,22 @@ type DialogClientConfig struct {
 
 func (c *DialogClientConfig) Validate() error {
 	if !c.Enable {
+		return nil
+	}
+
+	return nil // todo
+}
+
+type TarantoolConfig struct {
+	EnableMock      bool          `yaml:"enable_mock"`
+	Address         string        `yaml:"address"`
+	Username        string        `yaml:"username"`
+	Password        string        `yaml:"password" env:"TARANTOOL_DB_PASSWORD"`
+	TimeoutDuration time.Duration `yaml:"timeout_duration"`
+}
+
+func (c *TarantoolConfig) Validate() error {
+	if c.EnableMock {
 		return nil
 	}
 

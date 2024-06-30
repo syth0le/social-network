@@ -54,3 +54,8 @@ dialog:
   enable: true
   conn:
     endpoint: dialog-service:7050
+
+tarantool:
+  address: "tarantool:3301"
+  username: "admin"
+  password: "password"

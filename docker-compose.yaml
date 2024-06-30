@@ -125,6 +125,21 @@ services:
       interval: 5s
       timeout: 15s
       retries: 5
+  tarantool:
+    image: tarantool/tarantool:2.11.3
+    container_name: "tarantool"
+    command: tarantool /opt/tarantool/init.lua
+    networks:
+      - social_network_net
+    ports:
+      - "3301:3301"
+    volumes:
+      - ./infra/tarantool/conf/init.lua:/opt/tarantool/init.lua
+      - ./infra/tarantool/conf/config.yml:/etc/tarantool/config.yml
+      - tarantool:/var/lib/postgresql/data
+    environment:
+      TARANTOOL_USER_NAME: admin
+      TARANTOOL_USER_PASSWORD: password
 
 volumes:
   postgres-db-master:
@@ -132,6 +147,7 @@ volumes:
   redis-cache-data:
   message-broker-data:
   message-broker-data-log:
+  tarantool:
 
 networks:
   social_network_net:

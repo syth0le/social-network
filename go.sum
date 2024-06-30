@@ -106,6 +106,7 @@ github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSS
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
+github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
@@ -115,6 +116,14 @@ github.com/syth0le/dialog-service v0.0.0-20240623214116-6fe3493f7a48 h1:GspRUkXU
 github.com/syth0le/dialog-service v0.0.0-20240623214116-6fe3493f7a48/go.mod h1:9so6E3qWEQF1T3XP8Ucd9MAxDlt7ap0R1uOWdj0Kmpk=
 github.com/syth0le/gopnik v0.0.0-20240616213023-1c20ad938bed h1:mKznelnC8wTX2C6vcAHaTkpIs78AK5d0e9efEXH/oQ4=
 github.com/syth0le/gopnik v0.0.0-20240616213023-1c20ad938bed/go.mod h1:wxk6j4/UvfkpAY1vKB17WAqVfTBdzEC2owgJ4xC7nfs=
+github.com/tarantool/go-iproto v1.0.0 h1:quC4hdFhCuFYaCqOFgUxH2foRkhAy+TlEy7gQLhdVjw=
+github.com/tarantool/go-iproto v1.0.0/go.mod h1:LNCtdyZxojUed8SbOiYHoc3v9NvaZTB7p96hUySMlIo=
+github.com/tarantool/go-tarantool/v2 v2.1.0 h1:IY33WoS8Kqb+TxNnKbzu/7yVkiCNZGhbG5Gw0/tMfSk=
+github.com/tarantool/go-tarantool/v2 v2.1.0/go.mod h1:cpjGW5FHAXIMf0PKZte70pMOeadw1MA/hrDv1LblWk4=
+github.com/vmihailenco/msgpack/v5 v5.3.5 h1:5gO0H1iULLWGhs2H5tbAHIZTV8/cYafcFOr9znI5mJU=
+github.com/vmihailenco/msgpack/v5 v5.3.5/go.mod h1:7xyJ9e+0+9SaZT0Wt1RGleJXzli6Q/V5KbhBonMG9jc=
+github.com/vmihailenco/tagparser/v2 v2.0.0 h1:y09buUbR+b5aycVFQs/g70pqKVZNBmxwAhO7/IwNM9g=
+github.com/vmihailenco/tagparser/v2 v2.0.0/go.mod h1:Wri+At7QHww0WTrCBeu4J6bNtoV6mEfg5OIWRZA9qds=
 github.com/wagslane/go-rabbitmq v0.13.0 h1:u2JfKbwi3cbxCExKV34RrhKBZjW2HoRwyPTA8pERyrs=
 github.com/wagslane/go-rabbitmq v0.13.0/go.mod h1:1sUJ53rrW2AIA7LEp8ymmmebHqqq8ksH/gXIfUP0I0s=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=

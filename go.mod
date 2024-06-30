@@ -14,6 +14,8 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/syth0le/dialog-service v0.0.0-20240623214116-6fe3493f7a48
 	github.com/syth0le/gopnik v0.0.0-20240616213023-1c20ad938bed
+	github.com/tarantool/go-tarantool/v2 v2.1.0
+	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/wagslane/go-rabbitmq v0.13.0
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.64.0
@@ -33,6 +35,8 @@ require (
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/rabbitmq/amqp091-go v1.7.0 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
+	github.com/tarantool/go-iproto v1.0.0 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	golang.org/x/net v0.22.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect

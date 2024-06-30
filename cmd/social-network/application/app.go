@@ -19,6 +19,7 @@ import (
 	"github.com/syth0le/social-network/internal/service/post"
 	"github.com/syth0le/social-network/internal/service/user"
 	"github.com/syth0le/social-network/internal/storage/postgres"
+	"github.com/syth0le/social-network/internal/storage/tarantool"
 	"github.com/syth0le/social-network/internal/token"
 
 	xclients "github.com/syth0le/gopnik/clients"
@@ -103,10 +104,17 @@ func (a *App) constructEnv(ctx context.Context) (*env, error) {
 	}
 	a.Closer.Add(consumer.Close)
 
+	tarantoolStorage, err := tarantool.NewStorage(ctx, a.Logger, a.Config.Tarantool)
+	if err != nil {
+		return nil, fmt.Errorf("new tarantool storage: %w", err)
+	}
+	a.Closer.Add(tarantoolStorage.Close)
+
 	tokenManager := token.NewManager(a.Config.Application)
 	userService := &user.ServiceImpl{
-		Storage:      postgresDB,
-		TokenManager: tokenManager,
+		Storage:          postgresDB,
+		TokenManager:     tokenManager,
+		TarantoolStorage: tarantoolStorage,
 	}
 
 	friendService := &friend.ServiceImpl{Storage: postgresDB}

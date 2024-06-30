@@ -3,10 +3,9 @@ package publicapi
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	xerrors "github.com/syth0le/gopnik/errors"
-
-	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -175,6 +174,37 @@ func (h *Handler) SearchUser(w http.ResponseWriter, r *http.Request) {
 	writeResponse(w, response)
 }
 
+func (h *Handler) SearchTarantoolUser(w http.ResponseWriter, r *http.Request) {
+	handleRequest := func() (*userListResponse, error) {
+		ctx := r.Context()
+		firstName := r.URL.Query().Get("first_name")
+		secondName := r.URL.Query().Get("second_name")
+		if firstName == "" {
+			return nil, xerrors.WrapValidationError(fmt.Errorf("incorrect query args. firstName cannot by empty"))
+		}
+		if secondName == "" {
+			return nil, xerrors.WrapValidationError(fmt.Errorf("incorrect query args. secondName cannot by empty"))
+		}
+
+		userModel, err := h.UserService.SearchTarantoolUser(ctx, &user.SearchTarantoolUserParams{
+			FirstName:  firstName,
+			SecondName: secondName,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("search tarantool user: %w", err)
+		}
+
+		return tarantoolUserModelsToResponse(userModel), nil
+	}
+
+	response, err := handleRequest()
+	if err != nil {
+		h.writeError(r.Context(), w, fmt.Errorf("search tarantool user: %w", err))
+		return
+	}
+	writeResponse(w, response)
+}
+
 func userModelToResponse(user *model.User) *userResponse {
 	return &userResponse{
 		UserID:     user.UserID.String(),
@@ -192,6 +222,28 @@ func userModelsToResponse(userModels []*model.User) *userListResponse {
 	users := make([]*userResponse, 0)
 	for _, userModel := range userModels {
 		users = append(users, userModelToResponse(userModel))
+	}
+	return &userListResponse{
+		Users: users,
+	}
+}
+
+func tarantoolUserModelToResponse(user model.TarantoolUser) *userResponse {
+	return &userResponse{
+		UserID:     user.UserID,
+		Username:   user.Username,
+		FirstName:  user.FirstName,
+		SecondName: user.SecondName,
+		Sex:        user.Sex,
+		Biography:  user.Biography,
+		City:       user.City,
+	}
+}
+
+func tarantoolUserModelsToResponse(userModels []model.TarantoolUser) *userListResponse {
+	users := make([]*userResponse, 0)
+	for _, userModel := range userModels {
+		users = append(users, tarantoolUserModelToResponse(userModel))
 	}
 	return &userListResponse{
 		Users: users,
