@@ -9,6 +9,7 @@ import (
 	"github.com/syth0le/social-network/cmd/users-generator/configuration"
 	"github.com/syth0le/social-network/internal/service/generator"
 	"github.com/syth0le/social-network/internal/storage/postgres"
+	"github.com/syth0le/social-network/internal/storage/tarantool"
 )
 
 type App struct {
@@ -32,10 +33,17 @@ func (a *App) Run() error {
 	}
 	defer db.Close()
 
+	tarantoolStorage, err := tarantool.NewStorage(ctx, a.Logger, a.Config.Tarantool)
+	if err != nil {
+		return fmt.Errorf("new tarantool storage: %w", err)
+	}
+	defer tarantoolStorage.Close()
+
 	userService := &generator.ServiceImpl{
-		Logger:   a.Logger,
-		Storage:  db,
-		DataFile: a.Config.Application.DataFile,
+		Logger:           a.Logger,
+		Storage:          db,
+		DataFile:         a.Config.Application.DataFile,
+		TarantoolStorage: tarantoolStorage,
 	}
 
 	if err := userService.BatchGenerateUsers(ctx); err != nil {

@@ -1,5 +1,6 @@
 logger:
-  level: "debug"
+  level: "info"
+  environment: "prod"
   encoding: "console"
   path: "stdout"
 
@@ -16,3 +17,8 @@ storage:
 
 application:
   data_file: "people.csv"
+
+tarantool:
+  address: "localhost:3301"
+  username: "admin"
+  password: "password"

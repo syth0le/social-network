@@ -5,6 +5,8 @@ import (
 
 	xstorage "github.com/syth0le/gopnik/db/postgres"
 	xlogger "github.com/syth0le/gopnik/logger"
+
+	"github.com/syth0le/social-network/cmd/social-network/configuration"
 )
 
 const (
@@ -33,6 +35,13 @@ func NewDefaultConfig() *Config {
 			SSLMode:               "",
 			ConnectionAttempts:    0,
 			InitializationTimeout: 5 * time.Second,
+		},
+		Tarantool: configuration.TarantoolConfig{
+			EnableMock:      false,
+			Address:         "",
+			Username:        "",
+			Password:        "",
+			TimeoutDuration: 1 * time.Second,
 		},
 	}
 }
