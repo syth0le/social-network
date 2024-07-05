@@ -22,7 +22,7 @@ internal_grpc_server:
 storage:
   hosts:
     - "master"
-#    - "slave"
+    - "slave"
   port: 5432
   database: "social-network-local"
   username: "social-network-local-admin"
@@ -45,7 +45,7 @@ queue:
   exchange_name: "events"
 
 notifications_queue:
-  enable: true
+  enable: false
   address: "amqp://guest:guest@notifications-broker:5672"
   queue_name: "notifications-queue"
   exchange_name: "events"

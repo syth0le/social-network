@@ -21,6 +21,10 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
+      slave:
+        condition: service_healthy
+      migrate-slave:
+        condition: service_completed_successfully
       message-broker:
           condition: service_healthy
     volumes:
@@ -68,33 +72,84 @@ services:
         condition: service_healthy # needful setting which wait available postgres host
     volumes:
       - ./migrations:/migrations
-#  slave:
-#    image: postgres:latest
-#    container_name: "slave"
-#    env_file:
-#      - .env
-#    volumes:
-#      - postgres-db-slave:/var/lib/postgresql/data
-#    environment:
-#      - POSTGRES_DB=social-network-local
-#      - POSTGRES_NAME=social-network-local
-#      - POSTGRES_USER=social-network-local-admin
-#      - POSTGRES_MASTER_HOST=master
-#      - POSTGRES_MASTER_PORT=6432
-#      - POSTGRES_PASSWORD=${DB_PASSWORD}
-#    ports:
-#      - "7432:5432"
-#    healthcheck:
-#      test: [ "CMD-SHELL", "pg_isready" ]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 5
-#      start_period: 10s
-#    depends_on:
-#      - master
-#    restart: always
-#    networks:
-#      - mynet
+  slave:
+    image: postgres:latest
+    container_name: "slave"
+    env_file:
+      - .env
+    volumes:
+      - postgres-db-slave:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=social-network-local
+      - POSTGRES_NAME=social-network-local
+      - POSTGRES_USER=social-network-local-admin
+      - POSTGRES_MASTER_HOST=master
+      - POSTGRES_MASTER_PORT=6432
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "4432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      - master
+    restart: always
+    networks:
+      - social_network_net
+  migrate-slave:
+    image: migrate/migrate
+    container_name: "slave-migrate"
+    command: [ "-path", "/migrations", "-database",  "postgresql://social-network-local-admin:eephayl3eaph8Xo@slave:5432/social-network-local?sslmode=disable", "up" ]
+    networks:
+      - social_network_net
+    depends_on:
+      master:
+        condition: service_healthy # needful setting which wait available postgres host
+    volumes:
+      - ./migrations:/migrations
+
+  slave-2:
+    image: postgres:latest
+    container_name: "slave-2"
+    env_file:
+      - .env
+    volumes:
+      - postgres-db-slave-2:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=social-network-local
+      - POSTGRES_NAME=social-network-local
+      - POSTGRES_USER=social-network-local-admin
+      - POSTGRES_MASTER_HOST=master
+      - POSTGRES_MASTER_PORT=6432
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "3432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      - master
+    restart: always
+    networks:
+      - social_network_net
+  migrate-slave-2:
+    image: migrate/migrate
+    container_name: "slave-migrate"
+    command: [ "-path", "/migrations", "-database",  "postgresql://social-network-local-admin:eephayl3eaph8Xo@slave-2:5432/social-network-local?sslmode=disable", "up" ]
+    networks:
+      - social_network_net
+    depends_on:
+      master:
+        condition: service_healthy # needful setting which wait available postgres host
+    volumes:
+      - ./migrations:/migrations
+
   cache:
     build:
       context: infra/redis
@@ -144,6 +199,7 @@ services:
 volumes:
   postgres-db-master:
   postgres-db-slave:
+  postgres-db-slave-2:
   redis-cache-data:
   message-broker-data:
   message-broker-data-log:
