@@ -42,3 +42,17 @@
 6. отправить сообщение в диалог `[POST] localhost:8070/dialog/send` (в ручке сервиса диалогов) или в `[POST] localhost:8080/dialog/send`.
 7. получить все сообщения в диалоге `[GET] localhost:8070/dialog/{dialogId}/list` (в ручке сервиса диалогов) или в `[GET] localhost:8080/dialog/{dialogId}/list`.
 8. все необходимые ручки есть в [постман коллекции](https://www.postman.com/aerospace-cosmonaut-29691174/workspace/highload-architect/collection/33337980-46a4c50d-5b28-4566-87dd-57e178216abd?action=share&creator=33337980). В работе можно использовать ручки в коллекции `8th hw http collection`.
+
+Логи:
+```
+2024-07-05T18:19:08.561Z        INFO    servers/http.go:146     http request: localhost:8070/dialog/dlgd5f0c5434208b46a98cbfdcf0ea06798f/list
+2024-07-05T18:19:08.577Z        INFO    sharder/core.go:75      get shard: second_shard
+
+2024-07-05T18:18:53.019Z        INFO    servers/http.go:146     http request: localhost:8070/dialog
+2024-07-05T18:18:53.044Z        INFO    sharder/core.go:75      get shard: first_shard
+
+2024-07-05T18:57:16.406Z        INFO    servers/http.go:146     http request: localhost:8070/dialog/send
+2024-07-05T18:57:16.465Z        INFO    sharder/core.go:75      get shard: second_shard
+```
+
+- из логов видно, что запросы размазываются по разным шардам и все методы работают корректно
