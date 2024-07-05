@@ -23,12 +23,13 @@
 10. можно добавить в postgresql.conf: `primary_conninfo = 'host=msater port=5432 user=repluser password=pass application_name=slave'`
 11. проводим тестирование с синхронной репликацией
 12. теперь перейдем к асинхронной реплике
-13. настраиваем слейв 2 и включаем синхронную репликацию ```sql
+13. настраиваем слейв 2 и включаем синхронную репликацию 
+    ```
     synchronous_commit = on
     synchronous_standby_names = 'FIRST 1 (pgslave, pgasyncslave)'
 
-   select pg_reload_conf();
-   ```
+    select pg_reload_conf();
+    ```
 14. проводим нагрузочное тестирование снова
     `bombardier -c 100 -d 10s "localhost:8080/user/search-tarantool?first_name=Абр&second_name=Юр"`
 15. убиваем мастер
