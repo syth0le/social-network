@@ -11,7 +11,7 @@
 - реализован [алгоритм](https://github.com/syth0le/dialog-service/blob/main/internal/storage/sharder/core.go) консистентного хэширования, который размазывает данные по шардам
   - данный подход поможет реализовывать решардинг с меньшими потерями, в отличие от определения через обычное хэширование
 - в качестве проверки было имплементировано 2 "шарда"
-  - инфраструктурный код, регистрирующий базки в алгоритме консистентного хэширования: https://github.com/syth0le/dialog-service/blob/main/cmd/dialog/application/app.go#L68
+  - инфраструктурный код, регистрирующий базки в алгоритме консистентного хэширования: [код](https://github.com/syth0le/dialog-service/blob/main/cmd/dialog/application/app.go#L68)
   - компоуз с контейнерами: [код](https://github.com/syth0le/dialog-service/blob/main/docker-compose.yaml)
 - реализованы 3 ручки
   - создание диалога `[POST] localhost:8070/dialog`
