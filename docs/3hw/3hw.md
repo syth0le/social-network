@@ -1,5 +1,6 @@
 ## Реализация 
 - в [docker-compose.yaml](https://github.com/syth0le/social-network/blob/main/docker-compose.yaml) добавлен контейнер со слейвами и миграторы для них
+- все необходимые запросы переведены на чтение со слейва [example](https://github.com/syth0le/social-network/blob/main/internal/storage/postgres/user.go#L133)
 
 ## Алгоритм пошаговый:
 1. поднимаем приложение `make rebuild`
