@@ -1,6 +1,22 @@
 version: "3.9"
 
 services:
+  nginx:
+    container_name: "nginx"
+    image: nginx:latest
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+#      - ./infra/nginx/logs:/var/log/nginx
+    depends_on:
+      - backend
+      - backend-2
+      - backend-3
+    ports:
+      - "80:80"
+      - "7075:7075"
+    networks:
+      - social_network_net
+
   backend:
     container_name: "social-network"
     build:
@@ -27,6 +43,58 @@ services:
         condition: service_completed_successfully
       message-broker:
           condition: service_healthy
+    volumes:
+      - .:/usr/src/app
+    networks:
+      - social_network_net
+      - realtime-notification-service_notifications_net
+      - dialog-service_dialog_net
+    external_links:
+      - notifications-broker:notifications-broker
+      - backend:backend
+  backend-2:
+    container_name: "social-network-2"
+    build:
+      context: .
+    command: "/usr/local/bin/social-network --config=/usr/src/app/cmd/social-network/local_config.yaml"
+    restart: always
+    ports:
+      - "8082:8080"
+      - "8083:8081"
+      - "7071:7070"
+    env_file:
+      - .env
+    environment:
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_TOKEN_SALT=${JWT_TOKEN_SALT}
+    depends_on:
+      - backend
+    volumes:
+      - .:/usr/src/app
+    networks:
+      - social_network_net
+      - realtime-notification-service_notifications_net
+      - dialog-service_dialog_net
+    external_links:
+      - notifications-broker:notifications-broker
+      - backend:backend
+  backend-3:
+    container_name: "social-network-3"
+    build:
+      context: .
+    command: "/usr/local/bin/social-network --config=/usr/src/app/cmd/social-network/local_config.yaml"
+    restart: always
+    ports:
+      - "8084:8080"
+      - "8085:8081"
+      - "7072:7070"
+    env_file:
+      - .env
+    environment:
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_TOKEN_SALT=${JWT_TOKEN_SALT}
+    depends_on:
+      - backend-2
     volumes:
       - .:/usr/src/app
     networks:
@@ -140,7 +208,7 @@ services:
       - social_network_net
   migrate-slave-2:
     image: migrate/migrate
-    container_name: "slave-migrate"
+    container_name: "slave-migrate-2"
     command: [ "-path", "/migrations", "-database",  "postgresql://social-network-local-admin:eephayl3eaph8Xo@slave-2:5432/social-network-local?sslmode=disable", "up" ]
     networks:
       - social_network_net
