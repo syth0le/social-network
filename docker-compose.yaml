@@ -16,6 +16,22 @@ services:
       - "7075:7075"
     networks:
       - social_network_net
+  haproxy:
+    image: haproxy:2.6
+    depends_on:
+      master:
+          condition: service_healthy
+      slave:
+          condition: service_healthy
+      slave-2:
+          condition: service_healthy
+    ports:
+      - "5488:5488"
+    volumes:
+      - ./infra/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    networks:
+      - social_network_net
+
 
   backend:
     container_name: "social-network"

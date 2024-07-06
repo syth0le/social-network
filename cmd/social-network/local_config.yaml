@@ -20,10 +20,13 @@ internal_grpc_server:
   enable_recover: true
 
 storage:
+#  hosts:
+#    - "master"
+#    - "slave"
+#  port: 5432
   hosts:
-    - "master"
-    - "slave"
-  port: 5432
+    - "haproxy"
+  port: 5488
   database: "social-network-local"
   username: "social-network-local-admin"
   ssl_mode: "disable"
