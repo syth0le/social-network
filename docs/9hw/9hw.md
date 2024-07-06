@@ -65,5 +65,14 @@
   - `192.168.65.1 - - [06/Jul/2024:12:19:26 +0000] "GET /user/snwu981936fee1f249f098965c6102f6e5f3 HTTP/1.1" 500 40 "-" "fasthttp"`
   - после этого nginx снял нагрузку с этого бэкенда и убрал его из пула выбора хоста при балансировке
 
-- описана конфигурация с haproxy:
-  - 
+- описана [конфигурация с haproxy](https://github.com/syth0le/social-network/blob/main/infra/haproxy/haproxy.cfg):
+- добавлен контейнер с haproxy [compose](https://github.com/syth0le/social-network/blob/main/docker-compose.yaml#L19)
+- переключен поход приложений в балансер, вместо прямых походов: [конфиг](https://github.com/syth0le/social-network/blob/main/cmd/social-network/local_config.yaml#L28)
+- проведено нагрузочное тестирование в ходе которого было определено следующее:
+  - максимальный RPS вырос до 10000, это говорит о том, что раньше мы упирались в базу и дожидались ответа от нее
+  - при нештатном отключении одного из слейвов получили 96 500ок при 50000тыс запросах
+    - это говорит о том, что haproxy не смог быстро убрать контейнер с бд из балансировки, из-за чего некоторые запросы шли в мертвый контейнер
+    - сам haproxy написал следующее сообщение:
+      ```
+    [WARNING]  (8) : Server pgReadWrite/pg1 is DOWN, reason: Layer4 timeout, check duration: 3002ms. 2 active and 0 backup servers left. 94 sessions active, 0 requeued, 0 remaining in queue.
+      ```
